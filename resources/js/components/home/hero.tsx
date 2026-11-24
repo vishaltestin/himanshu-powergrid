@@ -10,7 +10,24 @@ import {
 } from '@/components/ui/carousel';
 import Autoplay from 'embla-carousel-autoplay';
 import Fade from 'embla-carousel-fade';
+import { usePage } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
+
+/** Split a title around its highlighted word so the colouring matches the design. */
+function renderTitle(title: string, highlight?: string | null, highlightClass?: string | null) {
+    if (!highlight || !title.includes(highlight)) {
+        return title;
+    }
+    const [before, ...rest] = title.split(highlight);
+    const after = rest.join(highlight);
+    return (
+        <>
+            {before}
+            <span className={highlightClass || 'text-accent'}>{highlight}</span>
+            {after}
+        </>
+    );
+}
 
 const HEADINGS = [
     <span key="1">
@@ -78,6 +95,26 @@ const CAROUSEL_DATA = [
 function Hero() {
     const [api, setApi] = useState<CarouselApi>();
     const [current, setCurrent] = useState(0);
+
+    // Dynamic banners from the admin, falling back to the original slides.
+    const { props } = usePage<any>();
+    const banners: any[] | undefined = props.banners;
+    const slides =
+        banners && banners.length > 0
+            ? banners.map((b) => ({
+                  title: renderTitle(b.title, b.highlight, b.highlight_class),
+                  desc: b.description,
+                  buttonText: b.button_text || 'Learn more',
+                  buttonLink: b.button_link || '/contact-us',
+                  image: b.image,
+              }))
+            : CAROUSEL_DATA.map((s) => ({
+                  title: s.title,
+                  desc: s.desc,
+                  buttonText: s.buttonText,
+                  buttonLink: '/contact-us',
+                  image: s.image,
+              }));
 
     useEffect(() => {
         if (!api) return;
@@ -211,7 +248,7 @@ function Hero() {
                 className="h-full w-full [&>div]:h-full"
             >
                 <CarouselContent className="h-full">
-                    {CAROUSEL_DATA.map((slide, index) => (
+                    {slides.map((slide, index) => (
                         <CarouselItem
                             key={index}
                             className="relative h-full w-full"
@@ -262,7 +299,7 @@ function Hero() {
                                 <motion.div variants={itemVariants}>
                                     <ThemeButton
                                         text={slide.buttonText}
-                                        link="/contact-us"
+                                        link={slide.buttonLink}
                                     />
                                 </motion.div>
                             </motion.div>
@@ -273,7 +310,7 @@ function Hero() {
                 <CarouselNext className="absolute top-1/2 right-4 z-20 h-11 w-11 -translate-y-1/2 border-none bg-white/20 text-white ring ring-white backdrop-blur-sm transition-all hover:bg-white/70 sm:right-8 md:h-14 md:w-14" /> */}
             </Carousel>
             <div className="absolute bottom-8 left-1/2 z-20 flex -translate-x-1/2 gap-3 md:bottom-16">
-                {CAROUSEL_DATA.map((_, index) => (
+                {slides.map((_, index) => (
                     <button
                         key={index}
                         onClick={() => api?.scrollTo(index)}

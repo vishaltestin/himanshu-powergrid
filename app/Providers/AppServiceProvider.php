@@ -25,6 +25,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // assets live in public/site-build ('public/build' is not persisted in the workspace)
+        app(\Illuminate\Foundation\Vite::class)->useBuildDirectory('site-build');
         $this->configureDefaults();
 
         Gate::before(function ($user, $ability) {

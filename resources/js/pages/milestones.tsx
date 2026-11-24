@@ -18,7 +18,7 @@ type TimelineItem = {
     image: string;
 };
 
-const timeline: TimelineItem[] = [
+const defaultTimeline: TimelineItem[] = [
     {
         year: '2026',
         title: 'The Beginning',
@@ -49,13 +49,24 @@ const timeline: TimelineItem[] = [
     },
 ];
 
-export default function Milestones() {
+export default function Milestones({ content }: { content?: any }) {
+    const c = content ?? {};
+
+    const timeline: TimelineItem[] = (
+        Array.isArray(c.timeline) && c.timeline.length
+            ? c.timeline.map((item: any, i: number) => ({
+                  year: item?.year || '',
+                  title: item?.title || '',
+                  description: item?.description || '',
+                  image: item?.image || defaultTimeline[i]?.image || '/images/power-grid-3.jpg',
+              }))
+            : defaultTimeline
+    ).filter((item: any) => item.year || item.title);
+
     return (
         <>
             <NavbarThree />
-            <PageBanner title="Milestones & Achivements"
-            image='/images/milestone.webp'
-             />
+            <PageBanner title={content?.banner_title || "Milestones & Achivements"} image={content?.banner_image || "/images/milestone.webp"} />
             <MaxWidthWrapper className="pt-24 md:pb-16">
                 <div className="relative">
                     {timeline.map((item, index) => {

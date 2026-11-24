@@ -34,24 +34,4 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
-
-    public function school()
-    {
-        return $this->hasOne(Register::class, 'user_id');
-    }
-
-    public function activitySubmissions()
-    {
-        return $this->hasMany(ActivitySubmission::class);
-    }
-
-    public function register()
-    {
-        return $this->hasOne(Register::class);
-    }
-
-    public function badges()
-    {
-        return $this->belongsToMany(Badge::class, 'badge_user')->withTimestamps();
-    }
 }

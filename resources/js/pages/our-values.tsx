@@ -15,7 +15,7 @@ interface ValueItem {
     inPractice: string[];
 }
 
-const values: ValueItem[] = [
+const defaultValues: ValueItem[] = [
     {
         id: 'integrity',
         icon: '/images/icons/high-voltage.png',
@@ -91,7 +91,28 @@ const values: ValueItem[] = [
     },
 ];
 
-export default function OurValues() {
+export default function OurValues({ content }: { content?: any }) {
+    const c = content ?? {};
+
+    const slugify = (t: string) =>
+        t.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+
+    const values: ValueItem[] = (
+        Array.isArray(c.values) && c.values.length
+            ? c.values.map((item: any, i: number) => ({
+                  id: slugify(item?.title || '') || `value-${i + 1}`,
+                  icon: item?.icon || defaultValues[i]?.icon || '/images/icons/grid.png',
+                  title: item?.title || '',
+                  subtitle: item?.subtitle || '',
+                  description: item?.description || '',
+                  inPractice: (item?.in_practice ?? '')
+                      .split('\n')
+                      .map((s: string) => s.trim())
+                      .filter(Boolean),
+              }))
+            : defaultValues
+    ).filter((item: any) => item.title);
+
     const [activeHash, setActiveHash] = useState<string>('');
 
     useEffect(() => {
@@ -110,18 +131,22 @@ export default function OurValues() {
     return (
         <>
             <NavbarThree />
-            <PageBanner title="Our Core Values" image="/images/values.png" />
+            <PageBanner title={content?.banner_title || "Our Core Values"} image={content?.banner_image || "/images/values.png"} />
 
             <section className="py-14 md:py-20">
                 <MaxWidthWrapper>
                     <div className="mb-16 flex flex-col items-center text-center">
-                        <p className="mb-0 max-w-5xl md:text-lg">
-                            Our five core values shape our culture, guide our
-                            decisions, and define how we work. They reflect our
-                            commitment to integrity, social impact, respect,
-                            collaboration, and innovation in every project we
-                            undertake.
-                        </p>
+                        {c.intro ? (
+                            <div className="rich-text mb-0 max-w-5xl md:text-lg" dangerouslySetInnerHTML={{ __html: c.intro }} />
+                        ) : (
+                            <p className="mb-0 max-w-5xl md:text-lg">
+                                Our five core values shape our culture, guide our
+                                decisions, and define how we work. They reflect our
+                                commitment to integrity, social impact, respect,
+                                collaboration, and innovation in every project we
+                                undertake.
+                            </p>
+                        )}
                     </div>
                     <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-6">
                         {values.map((item, index) => {

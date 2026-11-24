@@ -7,7 +7,7 @@ import { Link } from '@inertiajs/react';
 import { ArrowUpRight, CornerDownLeftIcon } from 'lucide-react';
 import { useState } from 'react';
 
-const projects = [
+const defaultProjects = [
     {
         category: "under construction",
         title: "Coming Soon...",
@@ -64,19 +64,37 @@ const projects = [
     // },
 ];
 
-export default function Projects() {
+export default function Projects({ content }: { content?: any }) {
+    const c = content ?? {};
+
+    const projects = (
+        Array.isArray(c.projects) && c.projects.length
+            ? c.projects.map((item: any, i: number) => ({
+                  category: item?.category || 'under construction',
+                  title: item?.title || '',
+                  description: item?.description || '',
+                  location: item?.location || '',
+                  image: item?.image || defaultProjects[i]?.image || 'images/transmission-infra.jpg',
+              }))
+            : defaultProjects
+    ).filter((item: any) => item.title);
+
     return (
         <>
             <NavbarThree />
-            <PageBanner title="Projects" image='/images/project.avif' />
+            <PageBanner title={content?.banner_title || "Projects"} image={content?.banner_image || "/images/project.avif"} />
             <MaxWidthWrapper className="pt-12 lg:pt-24 pb-12 md:pb-16">
                 <div className="mb-16 flex flex-col items-center text-center">
-                        <TopLabel text="SELECTED PROJECTS" />
-                        <h2>We Build Complex Infrastructure</h2>
-                    <p className='md:text-lg max-w-4xl mb-0'>We are an integrated energy infrastructure platform focused on identifying, developing, constructing, operating, and scaling complex assets across India's power value chain.</p>
+                        <TopLabel text={c.section_label || 'SELECTED PROJECTS'} />
+                        <h2>{c.section_heading || 'We Build Complex Infrastructure'}</h2>
+                    {c.section_intro ? (
+                        <div className='rich-text md:text-lg max-w-4xl mb-0' dangerouslySetInnerHTML={{ __html: c.section_intro }} />
+                    ) : (
+                        <p className='md:text-lg max-w-4xl mb-0'>We are an integrated energy infrastructure platform focused on identifying, developing, constructing, operating, and scaling complex assets across India's power value chain.</p>
+                    )}
                 </div>
                 <div className="grid lg:grid-cols-3 gap-12">
-                    {projects.map((project, index) => (
+                    {projects.map((project: any, index: number) => (
                         <Link href='#' className="group" key={index}>
                             <div className="relative h-70 overflow-hidden rounded-xl bg-gray-200">
                                 <img

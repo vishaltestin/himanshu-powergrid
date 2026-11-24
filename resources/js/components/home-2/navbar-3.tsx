@@ -16,7 +16,7 @@ import {
 import { useEffect, useState } from 'react';
 import MaxWidthWrapper from '../max-width-wrapper';
 
-const NAV_LINKS = [
+const DEFAULT_NAV_LINKS = [
     { name: 'Home', href: '/' },
 
     {
@@ -104,7 +104,17 @@ export const NavbarThree = () => {
     const [isSticky, setIsSticky] = useState(false);
     const [lastScrollY, setLastScrollY] = useState(0);
 
-    const { url } = usePage();
+    const { url, globalMenus } = usePage<any>().props;
+    const navLinks: any[] = Array.isArray(globalMenus) && globalMenus.length
+        ? globalMenus.map((m: any) => ({
+              name: m.title,
+              href: m.alias,
+              isLink: m.alias !== '#',
+              megaMenu: (m.children ?? []).length
+                  ? (m.children ?? []).map((c: any) => ({ name: c.title, href: c.alias }))
+                  : undefined,
+          }))
+        : DEFAULT_NAV_LINKS;
 
     useEffect(() => {
         const handleScroll = () => {
@@ -141,7 +151,7 @@ export const NavbarThree = () => {
                         </Link>
                     </div>
                     <nav className="relative hidden h-full items-center gap-8 pr-12 md:flex">
-                        {NAV_LINKS.map((link) => {
+                        {navLinks.map((link) => {
                             const hasMegaMenu = !!link.megaMenu;
                             return (
                                 <div
@@ -197,7 +207,7 @@ export const NavbarThree = () => {
                                                         <div className="flex gap-8 p-4">
                                                             <div className="grid flex-1 grid-cols-2 gap-3">
                                                                 {link.megaMenu.map(
-                                                                    (item) => (
+                                                                    (item: any) => (
                                                                         <Link
                                                                             key={
                                                                                 item.name
@@ -236,7 +246,7 @@ export const NavbarThree = () => {
                                                     <div className="absolute -top-2 left-12 h-4 w-4 rotate-45 rounded-tl-xs border-t border-l border-black/10 bg-white" />
                                                     <div className="min-w-60">
                                                         {link.megaMenu.map(
-                                                            (item) => (
+                                                            (item: any) => (
                                                                 <Link
                                                                     key={
                                                                         item.name

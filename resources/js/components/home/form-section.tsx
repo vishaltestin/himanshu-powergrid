@@ -1,4 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
+import axios from 'axios';
+import { toast } from 'sonner';
 import { Leaf, Droplets, HardHat, ArrowRight, Globe, Settings, Building, Building2, Landmark } from 'lucide-react';
 import TopLabel from '../common/top-label';
 import MaxWidthWrapper from '../max-width-wrapper';
@@ -13,6 +15,42 @@ import {
 } from '../ui/select';
 
 const FormSection = () => {
+    const [form, setForm] = useState({
+        name: '',
+        company: '',
+        email: '',
+        phone: '',
+        enquiry_type: '',
+        message: '',
+    });
+    const [sending, setSending] = useState(false);
+
+    const set = (key: string) => (e: any) =>
+        setForm((f) => ({ ...f, [key]: e.target.value }));
+
+    const submit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setSending(true);
+        try {
+            await axios.post(
+                '/form-submissions',
+                { ...form, type: 'contact' },
+                { headers: { Accept: 'application/json' } },
+            );
+            toast.success('Thanks for reaching out. Our team will get back to you soon!');
+            setForm({ name: '', company: '', email: '', phone: '', enquiry_type: '', message: '' });
+        } catch (err: any) {
+            const errors = err?.response?.data?.errors;
+            const first = errors ? Object.values(errors)[0] : null;
+            toast.error(
+                (Array.isArray(first) ? first[0] : null) ||
+                    err?.response?.data?.message ||
+                    'Something went wrong. Please try again.',
+            );
+        } finally {
+            setSending(false);
+        }
+    };
     const features = [
         {
             title: 'Lenders & DFIs',
@@ -92,10 +130,7 @@ const FormSection = () => {
                                 more.
                             </p>
 
-                            <form
-                                className="space-y-4"
-                                onSubmit={(e) => e.preventDefault()}
-                            >
+                            <form className="space-y-4" onSubmit={submit}>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
                                         <input
@@ -132,7 +167,8 @@ const FormSection = () => {
                                 </div>
                                 <div>
                                     <select
-                                        defaultValue=""
+                                        value={form.enquiry_type}
+                                        onChange={set('enquiry_type')}
                                         className="w-full rounded-sm bg-gray-100 px-4 py-3.5 text-gray-800 ring ring-gray-200 transition-shadow focus:ring-1 focus:ring-[#54a93c] focus:outline-none"
                                     >
                                         <option value="" disabled>
@@ -169,9 +205,10 @@ const FormSection = () => {
 
                                 <button
                                     type="submit"
-                                    className="mt-4 flex items-center gap-2 rounded-sm bg-[#54a93c] px-6 py-3.5 font-semibold text-white transition-colors duration-300 hover:bg-[#438a30]"
+                                    disabled={sending}
+                                    className="mt-4 flex items-center gap-2 rounded-sm bg-[#54a93c] px-6 py-3.5 font-semibold text-white transition-colors duration-300 hover:bg-[#438a30] disabled:opacity-60"
                                 >
-                                    Send Message
+                                    {sending ? 'Sending…' : 'Send Message'}
                                     <ArrowRight className="h-4 w-4" />
                                 </button>
                             </form>

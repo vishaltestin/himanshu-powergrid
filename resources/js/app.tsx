@@ -1,5 +1,6 @@
 import { createInertiaApp } from '@inertiajs/react';
 import AppLayout from './layout/app-layout';
+import AdminLayout from './layout/admin-layout';
 import { ReactNode } from 'react';
 import '../css/app.css'
 import { createRoot } from 'react-dom/client';
@@ -19,16 +20,25 @@ const queryClient = new QueryClient({
     },
 });
 
+const noopLayout = (page: ReactNode) => page;
 
 createInertiaApp({
     title: (title) => (title ? `${title} - ${appName}` : appName),
     resolve: (name) => {
         const pages = import.meta.glob('./pages/**/*.tsx', { eager: true });
-        let page: any = pages[`./pages/${name}.tsx`];
+        const page: any = pages[`./pages/${name}.tsx`];
 
-        page.default.layout = page.default.layout || ((pageContent: ReactNode) => (
-            <AppLayout>{pageContent}</AppLayout>
-        ));
+        if (name === 'admin/login') {
+            page.default.layout = page.default.layout || noopLayout;
+        } else if (name.startsWith('admin/')) {
+            page.default.layout = page.default.layout || ((pageContent: ReactNode) => (
+                <AdminLayout>{pageContent}</AdminLayout>
+            ));
+        } else {
+            page.default.layout = page.default.layout || ((pageContent: ReactNode) => (
+                <AppLayout>{pageContent}</AppLayout>
+            ));
+        }
 
         return page;
     },

@@ -1,24 +1,59 @@
+import { usePage } from '@inertiajs/react';
 import MaxWidthWrapper from '../max-width-wrapper';
 
-const Footer = () => {
-    const companyLinks = [
-        'Home',
-        'About Company',
-        'Products',
-        'Solutions',
-        'Industries We Serve',
-        'Infrastructure / Facilities',
-        'Careers',
-    ];
+const defaultCompanyLinks = [
+    'Home',
+    'About Company',
+    'Products',
+    'Solutions',
+    'Industries We Serve',
+    'Infrastructure / Facilities',
+    'Careers',
+];
 
-    const resourceLinks = [
-        'Transmission',
-        'Renewable EPC',
-        'Pumped Hydro',
-        'Distribution',
-        'Nuclear (Shanti)',
-        'Green Hydrogen',
-    ];
+const defaultResourceLinks = [
+    'Transmission',
+    'Renewable EPC',
+    'Pumped Hydro',
+    'Distribution',
+    'Nuclear (Shanti)',
+    'Green Hydrogen',
+];
+
+const Footer = () => {
+    const { settings } = usePage<any>().props;
+
+    const parseJson = (key: string) => {
+        try {
+            return settings?.[key] ? JSON.parse(settings[key]) : null;
+        } catch {
+            return null;
+        }
+    };
+
+    const groups = parseJson('footer_link_groups');
+    const quickLinks = Array.isArray(groups) && groups[0]?.links?.length ? groups[0] : null;
+    const resourceGroup = Array.isArray(groups) && groups[1]?.links?.length ? groups[1] : null;
+
+    const companyLinks: any[] = quickLinks
+        ? quickLinks.links.map((l: any) => ({ title: l.title, href: l.href || '#' }))
+        : defaultCompanyLinks.map((t) => ({ title: t, href: '#' }));
+    const resourceLinks: any[] = resourceGroup
+        ? resourceGroup.links.map((l: any) => ({ title: l.title, href: l.href || '#' }))
+        : defaultResourceLinks.map((t) => ({ title: t, href: '#' }));
+
+    const socials = parseJson('social_links') || [];
+    const socialUrl = (key: string, idx: number) => {
+        const found = Array.isArray(socials) ? socials.find((s: any) => s?.key === key) : null;
+        return found?.url || (Array.isArray(socials) ? socials[idx]?.url : null) || '#';
+    };
+
+    const logoWhite: string = settings?.logo_white || '/images/logo-new-white.png';
+    const footerDescription: string = settings?.footer_description || '';
+    const contactAddress: string = settings?.contact_address || '7th Floor, Block B, Vatika Business Park Sohna Road, Badshahpur, Sector-49 Gurugram, Haryana - 122018';
+    const contactPhone: string = settings?.contact_phone || '+91 123 4567 890';
+    const contactPhoneHref = 'tel:' + contactPhone.replace(/[^0-9+]/g, '');
+    const contactEmail: string = settings?.contact_email || 'rajesh.suri@cubegrid.in';
 
     return (
         <footer className="relative bg-primary pt-16 pb-4 text-white">
@@ -33,20 +68,25 @@ const Footer = () => {
                         <div className="mb-6 flex items-center gap-2">
                             {/* Logo Placeholder */}
                             <img
-                                src="/images/logo-new-white.png"
+                                src={logoWhite}
                                 alt=""
                                 className="w-54"
                             />
                         </div>
                         <p className="mb-8 text-sm leading-relaxed text-white">
-                            A portfolio company of I Squared Capital. Building
-                            complex <br />energy infrastructure for India's clean
-                            energy future.
+                            {footerDescription || (
+                                <>
+                                    A portfolio company of I Squared Capital.
+                                    Building complex <br />
+                                    energy infrastructure for India's clean
+                                    energy future.
+                                </>
+                            )}
                         </p>
                         <div className="flex gap-4">
                             {/* Facebook */}
                             <a
-                                href="#"
+                                href={socialUrl("facebook", 0)}
                                 className="group flex h-10 w-10 items-center justify-center rounded-full bg-white/5 transition-all duration-300 hover:-translate-y-1 hover:bg-[#1877F2] hover:shadow-lg hover:shadow-[#1877F2]/30"
                             >
                                 <svg
@@ -59,7 +99,7 @@ const Footer = () => {
                             </a>
                             {/* Twitter/X */}
                             <a
-                                href="#"
+                                href={socialUrl("twitter", 1)}
                                 className="group flex h-10 w-10 items-center justify-center rounded-full bg-white/5 transition-all duration-300 hover:-translate-y-1 hover:bg-black hover:shadow-lg"
                             >
                                 <svg
@@ -72,7 +112,7 @@ const Footer = () => {
                             </a>
                             {/* LinkedIn */}
                             <a
-                                href="#"
+                                href={socialUrl("linkedin", 2)}
                                 className="group flex h-10 w-10 items-center justify-center rounded-full bg-white/5 transition-all duration-300 hover:-translate-y-1 hover:bg-[#0A66C2] hover:shadow-lg hover:shadow-[#0A66C2]/30"
                             >
                                 <svg
@@ -85,7 +125,7 @@ const Footer = () => {
                             </a>
                             {/* YouTube */}
                             <a
-                                href="#"
+                                href={socialUrl("youtube", 3)}
                                 className="group flex h-10 w-10 items-center justify-center rounded-full bg-white/5 transition-all duration-300 hover:-translate-y-1 hover:bg-[#FF0000] hover:shadow-lg hover:shadow-[#FF0000]/30"
                             >
                                 <svg
@@ -102,16 +142,16 @@ const Footer = () => {
                         {/* Company Links (Col 2) */}
                         <div>
                             <h4 className="mb-6 font-heading-2 text-2xl font-semibold tracking-tight text-white">
-                                Quick Links
+                                {quickLinks?.title || 'Quick Links'}
                             </h4>
                             <ul className="space-y-3">
                                 {companyLinks.map((item) => (
-                                    <li key={item}>
+                                    <li key={item.title}>
                                         <a
-                                            href="#"
+                                            href={item.href}
                                             className="text-sm text-white/90 transition-all duration-300 hover:pl-1 hover:text-white"
                                         >
-                                            {item}
+                                            {item.title}
                                         </a>
                                     </li>
                                 ))}
@@ -121,16 +161,16 @@ const Footer = () => {
                         {/* Resources (Col 3) */}
                         <div>
                             <h4 className="mb-6 font-heading-2 text-2xl font-semibold tracking-tight text-white">
-                                Resources
+                                {resourceGroup?.title || 'Resources'}
                             </h4>
                             <ul className="space-y-3">
                                 {resourceLinks.map((item) => (
-                                    <li key={item}>
+                                    <li key={item.title}>
                                         <a
-                                            href="#"
+                                            href={item.href}
                                             className="text-sm text-white/90 transition-all duration-300 hover:pl-1 hover:text-white"
                                         >
-                                            {item}
+                                            {item.title}
                                         </a>
                                     </li>
                                 ))}
@@ -166,9 +206,7 @@ const Footer = () => {
                                         </svg>
                                     </div>
                                     <span className="pt-1 transition-colors group-hover:text-white">
-                                        7th Floor, Block B, Vatika Business Park
-                                        Sohna Road, Badshahpur, Sector-49
-                                        Gurugram, Haryana - 122018
+                                        {contactAddress}
                                     </span>
                                 </li>
                                 <li className="group flex items-center gap-4">
@@ -188,10 +226,10 @@ const Footer = () => {
                                         </svg>
                                     </div>
                                     <a
-                                        href="tel:+91 123 4567 890"
+                                        href={contactPhoneHref}
                                         className="transition-colors group-hover:text-white"
                                     >
-                                        +91 123 4567 890
+                                        {contactPhone}
                                     </a>
                                 </li>
                                 <li className="group flex items-center gap-4">
@@ -211,10 +249,10 @@ const Footer = () => {
                                         </svg>
                                     </div>
                                     <a
-                                        href="mailto:rajesh.suri@cubegrid.in"
+                                        href={'mailto:' + contactEmail}
                                         className="transition-colors group-hover:text-white"
                                     >
-                                        rajesh.suri@cubegrid.in
+                                        {contactEmail}
                                     </a>
                                 </li>
                             </ul>
@@ -230,13 +268,13 @@ const Footer = () => {
                     </p>
                     <div className="flex gap-6">
                         <a
-                            href="#"
+                            href="/privacy-policy"
                             className="transition-colors hover:text-white"
                         >
                             Privacy Policy
                         </a>
                         <a
-                            href="#"
+                            href="/terms-service"
                             className="transition-colors hover:text-white"
                         >
                             Terms of Service

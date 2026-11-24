@@ -58,11 +58,11 @@ const products = [
     },
 ];
 
-function HomeTwo() {
+function HomeTwo({ latestPosts, content }: { latestPosts?: any[]; content?: any }) {
     return (
         <>
             <NavbarThree />
-            <Hero />
+            <Hero content={content} />
             <MaxWidthWrapper className="pt-24 pb-20">
                 
                 <div className="grid grid-cols-1 gap-12 lg:grid-cols-2 lg:gap-24">
@@ -420,7 +420,7 @@ function HomeTwo() {
             <WhyChooseUs />
             <SustainabilityCsr />
             <Clients />
-            <NewsAndUpdatesTwo />
+            <NewsAndUpdatesTwo posts={latestPosts} />
             <PowerCTA />
             {/* <FormSection /> */}
             <Footer />

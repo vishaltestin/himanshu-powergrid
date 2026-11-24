@@ -1,62 +1,59 @@
 import React from 'react';
 import MaxWidthWrapper from './max-width-wrapper';
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
+
+const defaultCompanyLinks = [
+    { title: 'Home', href: '/' },
+    { title: 'About Company', href: '/about-us' },
+    { title: 'Projects', href: '/projects' },
+    { title: 'New & Updates', href: '/news' },
+    { title: 'Careers', href: '/career' },
+    { title: 'Contact Us', href: '/contact-us' },
+];
+
+const defaultResourceLinks = [
+    { title: 'Transmission Infrastructure', href: '/pillar/transmission-infrastructure' },
+    { title: 'EPC for Renewable Evacuation', href: '/pillar/epc-for-renewable-evacuation' },
+];
 
 const Footer = () => {
-    // const companyLinks = [
-    //     'Home',
-    //     'About Company',
-    //     'Projects',
-    //     'New & Updates',
-    //     'Careers',
-    //     'Contact Us',
-    // ];
+    const { props } = usePage<any>();
+    const settings = props.settings ?? {};
 
-    const companyLinks = [
-        { title: 'Home', href: '/' },
-        { title: 'About Company', href: '/about-us' },
-        { title: 'Projects', href: '/projects' },
-        { title: 'New & Updates', href: '/news' },
-        { title: 'Careers', href: '/career' },
-        { title: 'Contact Us', href: '/contact-us' },
-    ];
+    // Footer link groups (Quick Links / Pillers columns) come from settings
+    let linkGroups: { title: string; links: { title: string; href: string }[] }[] = [];
+    try {
+        const parsed = settings.footer_link_groups ? JSON.parse(settings.footer_link_groups) : null;
+        if (Array.isArray(parsed)) linkGroups = parsed;
+    } catch {
+        linkGroups = [];
+    }
 
-    // const resourceLinks = [
-    //     'Transmission Infrastructure',
-    //     'EPC for Renewable Evacuation',
-    //     'Pumped Hydro Storage',
-    //     'Distribution Privatization',
-    //     'Nuclear Power — Shanti',
-    //     'Green Hydrogen',
-    // ];
+    const social: { key: string; label: string; url: string }[] = (() => {
+        try {
+            const parsed = settings.social_links ? JSON.parse(settings.social_links) : null;
+            return Array.isArray(parsed) ? parsed : [];
+        } catch {
+            return [];
+        }
+    })();
 
-    const resourceLinks = [
-        {
-            title: 'Transmission Infrastructure',
-            href: '/pillar/transmission-infrastructure',
-        },
-        {
-            title: 'EPC for Renewable Evacuation',
-            href: '/pillar/epc-for-renewable-evacuation',
-        },
-        // {
-        //     title: 'Pumped Hydro Storage',
-        //     href: '/pillar/pumped-hydro-storage',
-        // },
-        // {
-        //     title: 'Distribution Privatization',
-        //     href: '/pillar/distribution-privatization',
-        // },
-        // {
-        //     title: 'Nuclear Power — Shanti',
-        //     href: '/pillar/nuclear-power-shanti',
-        // },
-        // {
-        //     title: 'Green Hydrogen',
-        //     href: '/pillar/green-hydrogen',
-        // },
-    ];
+    const socialUrl = (key: string, fallbackIndex: number) =>
+        (social.find((x) => x.key === key)?.url) || social[fallbackIndex]?.url || '#';
 
+    const companyLinks = linkGroups[0]?.links?.length ? linkGroups[0].links : defaultCompanyLinks;
+    const resourceLinks = linkGroups[1]?.links?.length ? linkGroups[1].links : defaultResourceLinks;
+    const quickLinksTitle = linkGroups[0]?.title || 'Quick Links';
+    const resourceLinksTitle = linkGroups[1]?.title || 'Pillers';
+
+    const logoWhite: string = settings.logo_white || '/images/logo-new-white.png';
+    const footerDescription: string = settings.footer_description ||
+        'A portfolio company of I Squared Capital, building complex energy infrastructure for India’s clean energy future. We develop, construct, operate, and scale critical assets across India’s power value chain.';
+    const contactAddress: string = settings.contact_address ||
+        '7th Floor, Block B, Vatika Business Park Sohna Road, Badshahpur, Sector-49 Gurugram, Haryana - 122018';
+    const contactPhone: string = settings.contact_phone || '+91 123 4567 890';
+    const contactPhoneHref = 'tel:' + contactPhone.replace(/[^+\d]/g, '');
+    const contactEmail: string = settings.contact_email || 'admin@cubegrid.in';
     return (
         <footer className="relative bg-primary-foreground pt-8 pb-4 text-white md:pt-16">
             <MaxWidthWrapper className="relative z-10">
@@ -64,21 +61,17 @@ const Footer = () => {
                     <div className="">
                         <div className="mb-6 flex items-center gap-2">
                             <img
-                                src="/images/logo-new-white.png"
+                                src={logoWhite}
                                 alt=""
                                 className="w-48 md:w-54"
                             />
                         </div>
                         <p className="mb-8 max-w-sm text-sm leading-relaxed text-white">
-                            A portfolio company of I Squared Capital, building
-                            complex energy infrastructure for India’s clean
-                            energy future. We develop, construct, operate, and
-                            scale critical assets across India’s power value
-                            chain.
+                            {footerDescription}
                         </p>
                         <div className="flex gap-4">
                             <a
-                                href="#"
+                                href={socialUrl('facebook', 0)}
                                 className="group flex h-10 w-10 items-center justify-center rounded-full bg-white/5 transition-all duration-300 hover:-translate-y-1 hover:bg-[#1877F2] hover:shadow-lg hover:shadow-[#1877F2]/30"
                             >
                                 <svg
@@ -90,7 +83,7 @@ const Footer = () => {
                                 </svg>
                             </a>
                             <a
-                                href="#"
+                                href={socialUrl('twitter', 1)}
                                 className="group flex h-10 w-10 items-center justify-center rounded-full bg-white/5 transition-all duration-300 hover:-translate-y-1 hover:bg-black hover:shadow-lg"
                             >
                                 <svg
@@ -102,7 +95,7 @@ const Footer = () => {
                                 </svg>
                             </a>
                             <a
-                                href="#"
+                                href={socialUrl('linkedin', 2)}
                                 className="group flex h-10 w-10 items-center justify-center rounded-full bg-white/5 transition-all duration-300 hover:-translate-y-1 hover:bg-[#0A66C2] hover:shadow-lg hover:shadow-[#0A66C2]/30"
                             >
                                 <svg
@@ -114,7 +107,7 @@ const Footer = () => {
                                 </svg>
                             </a>
                             <a
-                                href="#"
+                                href={socialUrl('youtube', 3)}
                                 className="group flex h-10 w-10 items-center justify-center rounded-full bg-white/5 transition-all duration-300 hover:-translate-y-1 hover:bg-[#FF0000] hover:shadow-lg hover:shadow-[#FF0000]/30"
                             >
                                 <svg
@@ -154,9 +147,7 @@ const Footer = () => {
                                         </svg>
                                     </div>
                                     <span className="pt-1 transition-colors group-hover:text-white">
-                                        7th Floor, Block B, Vatika Business Park
-                                        Sohna Road, Badshahpur, Sector-49
-                                        Gurugram, Haryana - 122018
+                                        {contactAddress}
                                     </span>
                                 </li>
                                 <li className="group flex items-center gap-4">
@@ -176,10 +167,10 @@ const Footer = () => {
                                         </svg>
                                     </div>
                                     <a
-                                        href="tel:+911234567890"
+                                        href={contactPhoneHref}
                                         className="transition-colors group-hover:text-white"
                                     >
-                                        +91 123 4567 890
+                                        {contactPhone}
                                     </a>
                                 </li>
                                 <li className="group flex items-center gap-4">
@@ -199,10 +190,10 @@ const Footer = () => {
                                         </svg>
                                     </div>
                                     <a
-                                        href="mailto:admin@cubegrid.in"
+                                        href={`mailto:${contactEmail}`}
                                         className="transition-colors group-hover:text-white"
                                     >
-                                        admin@cubegrid.in
+                                        {contactEmail}
                                     </a>
                                 </li>
                             </ul>
@@ -211,7 +202,7 @@ const Footer = () => {
                     <div className="grid grid-cols-1 gap-8 md:grid-cols-2 md:gap-0 lg:grid-cols-3">
                         <div>
                             <h4 className="mb-4 font-heading text-2xl text-white md:mb-6">
-                                Quick Links
+                                {quickLinksTitle}
                             </h4>
                             <ul className="space-y-2">
                                 {companyLinks.map((item) => (
@@ -229,7 +220,7 @@ const Footer = () => {
 
                         <div className="">
                             <h4 className="mb-4 font-heading text-2xl text-white md:mb-6">
-                                Pillers
+                                {resourceLinksTitle}
                             </h4>
                             <ul className="space-y-2">
                                 {resourceLinks.map((item) => (
@@ -273,9 +264,7 @@ const Footer = () => {
                                         </svg>
                                     </div>
                                     <span className="pt-1 transition-colors group-hover:text-white">
-                                        7th Floor, Block B, Vatika Business Park
-                                        Sohna Road, Badshahpur, Sector-49
-                                        Gurugram, Haryana - 122018
+                                        {contactAddress}
                                     </span>
                                 </li>
                                 <li className="group flex items-center gap-4">
@@ -295,10 +284,10 @@ const Footer = () => {
                                         </svg>
                                     </div>
                                     <a
-                                        href="tel:+911234567890"
+                                        href={contactPhoneHref}
                                         className="transition-colors group-hover:text-white"
                                     >
-                                        +91 123 4567 890
+                                        {contactPhone}
                                     </a>
                                 </li>
                                 <li className="group flex items-center gap-4">
@@ -318,10 +307,10 @@ const Footer = () => {
                                         </svg>
                                     </div>
                                     <a
-                                        href="mailto:admin@cubegrid.in"
+                                        href={`mailto:${contactEmail}`}
                                         className="transition-colors group-hover:text-white"
                                     >
-                                        admin@cubegrid.in
+                                        {contactEmail}
                                     </a>
                                 </li>
                             </ul>

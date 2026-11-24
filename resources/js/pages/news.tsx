@@ -6,7 +6,7 @@ import { Link } from '@inertiajs/react';
 import { ArrowUpRight, CalendarDays, CornerDownLeftIcon } from 'lucide-react';
 import { useState } from 'react';
 
-const news = [
+const fallbackNews = [
     {
         type: 'Press Release',
         date: '18 Aug 2026',
@@ -33,11 +33,24 @@ const news = [
     // },
 ];
 
-export default function News() {
+interface Post {
+    id?: number;
+    type: string;
+    date: string;
+    title: string;
+    description: string;
+    image: string;
+}
+
+export default function News({ posts, content }: { posts?: Post[]; content?: any }) {
+    const news = posts && posts.length > 0 ? posts : fallbackNews;
+    const bannerTitle = content?.banner_title || 'News & Updates';
+    const bannerImage = content?.banner_image || '/images/news.jpg';
+
     return (
         <>
             <NavbarThree />
-            <PageBanner title="News & Updates" image='/images/news.jpg' />
+            <PageBanner title={bannerTitle} image={bannerImage} />
             <MaxWidthWrapper className="pt-12 md:pt-24 pb-12 md:pb-16">
                 <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
                     {news.map((item) => (

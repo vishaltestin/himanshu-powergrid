@@ -157,22 +157,46 @@ const team: TeamMember[] = [
     },
 ];
 
-export default function Teams() {
+export default function Teams({
+    board,
+    leadership,
+    content,
+}: {
+    board?: TeamMember[];
+    leadership?: TeamMember[];
+    content?: any;
+}) {
     const [activeMember, setActiveMember] = useState<TeamMember | null>(null);
+    const activeBoard = (board && board.length > 0 ? board : boardOfDirectors).map((m: any) => ({
+        ...m,
+        // Admin stores bio text as `paragraphs`/`highlights`; the card dialog reads `fullDetails`.
+        fullDetails:
+            m.fullDetails ??
+            (m.paragraphs && m.paragraphs.length > 0
+                ? { paragraphs: m.paragraphs, highlights: m.highlights ?? [] }
+                : undefined),
+    }));
+    const activeLeadership = leadership ?? [];
+    const bannerTitle = content?.banner_title || 'Management Team';
+    const bannerImage = content?.banner_image || '/images/team-2.png';
+    const introText =
+        content?.intro ||
+        'Our leadership team is expanding rapidly. Each CXO being onboarded brings 30+ years of hands-on experience in developing, constructing, and operating infrastructure assets at scale — with 150+ years of combined experience across transmission, storage, distribution, nuclear, and hydrogen.';
+    const quoteText =
+        content?.quote || '"Building the team that builds India\'s grid".';
+
     return (
         <>
             <Head title="Management Team" />
             <NavbarThree />
-            <PageBanner title="Management Team" image='/images/team-2.png' />
+            <PageBanner title={bannerTitle} image={bannerImage} />
             <MaxWidthWrapper className="pt-24 md:pb-24">
                 <div className="mb-8 flex flex-col items-center text-center md:mb-12">
                     {/* <h2>Our leadership</h2> */}
-                    <p className="max-w-6xl text-lg">
-                        Our leadership team is expanding rapidly. Each CXO being onboarded brings 30+ years of hands-on experience in developing, constructing, and operating infrastructure assets at scale — with 150+ years of combined experience across transmission, storage, distribution, nuclear, and hydrogen.
-                    </p>
+                    <p className="max-w-6xl text-lg">{introText}</p>
                 </div>
                 <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-10">
-                    {boardOfDirectors.map((director) => (
+                    {activeBoard.map((director) => (
                         <div
                             key={director.id}
                             className="group relative flex overflow-hidden rounded-2xl ring ring-primary/20"
@@ -238,8 +262,8 @@ export default function Teams() {
                                                     <div className="mt-4 flex-1 space-y-4">
                                                         {director.fullDetails.paragraphs.map(
                                                             (
-                                                                paragraph,
-                                                                index,
+                                                                paragraph: string,
+                                                                index: number,
                                                             ) => (
                                                                 <p key={index}>
                                                                     {paragraph}
@@ -253,8 +277,11 @@ export default function Teams() {
                                                         <div className="flex shrink-0 flex-col gap-4 p-1">
                                                             {director.fullDetails.highlights.map(
                                                                 (
-                                                                    highlight,
-                                                                    index,
+                                                                    highlight: {
+                                                                        value: string;
+                                                                        label: string;
+                                                                    },
+                                                                    index: number,
                                                                 ) => (
                                                                     <div
                                                                         key={

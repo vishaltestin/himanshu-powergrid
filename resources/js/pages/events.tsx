@@ -18,7 +18,7 @@ interface EventItem {
     status: 'Upcoming' | 'Sold Out' | 'Free';
 }
 
-const events: EventItem[] = [
+const fallbackEvents: EventItem[] = [
     {
         id: '1',
         title: 'Coming Soon',
@@ -73,11 +73,15 @@ const events: EventItem[] = [
     // },
 ];
 
-export default function Events() {
+export default function Events({ events: serverEvents, content }: { events?: EventItem[]; content?: any }) {
+    const events = serverEvents && serverEvents.length > 0 ? serverEvents : fallbackEvents;
+    const bannerTitle = content?.banner_title || 'Events';
+    const bannerImage = content?.banner_image || '/images/events.png';
+
     return (
         <>
             <NavbarThree />
-            <PageBanner title="Events" image="/images/events.png" />
+            <PageBanner title={bannerTitle} image={bannerImage} />
             <MaxWidthWrapper className="pt-16 pb-24 md:pt-24 md:pb-24">
                 <div className="space-y-12">
                     <div className="grid grid-cols-1 gap-8 md:grid-cols-1">

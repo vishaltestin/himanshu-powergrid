@@ -5,7 +5,7 @@ import ThemeButton from '../common/theme-button';
 import { ArrowUpRight, CalendarDays } from 'lucide-react';
 import { Link } from '@inertiajs/react';
 
-const news = [
+const fallbackNews = [
     {
         type: 'Press Release',
         date: '18 Aug 2026',
@@ -32,7 +32,16 @@ const news = [
     },
 ];
 
-function NewsAndUpdatesTwo() {
+interface NewsItem {
+    type: string;
+    date: string;
+    title: string;
+    description: string;
+    image: string;
+}
+
+function NewsAndUpdatesTwo({ posts }: { posts?: NewsItem[] }) {
+    const news = posts && posts.length > 0 ? posts : fallbackNews;
     return (
         <section className="pt-12 pb-6 md:pb-16">
             <MaxWidthWrapper>

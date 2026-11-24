@@ -4,14 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Blog extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'title', 'alias', 'thumbnail', 'grade_id', 'category_id', 
+        'type', 'title', 'alias', 'thumbnail',
         'short_description', 'description', 'date', 'order', 'status'
     ];
 
@@ -23,13 +22,5 @@ class Blog extends Model
         ];
     }
 
-    public function category(): BelongsTo
-    {
-        return $this->belongsTo(ActivityCategory::class, 'category_id');
-    }
 
-    public function grade(): BelongsTo
-    {
-        return $this->belongsTo(Grade::class, 'grade_id');
-    }
 }

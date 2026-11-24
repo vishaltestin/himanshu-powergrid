@@ -8,7 +8,7 @@ import { ArrowRight, Pause, Play } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 
-const impactCards = [
+const defaultCards = [
     {
         id: 1,
         title: 'PEOPLE FIRST',
@@ -51,7 +51,28 @@ const impactCards = [
     },
 ];
 
-export default function LifeAtCubeGrid() {
+const cardSpans = [
+    'md:col-span-4 md:row-span-7',
+    'md:col-span-2 md:row-span-6',
+    'md:col-span-2 md:row-span-6',
+    'md:col-span-2 md:row-span-5',
+    'md:col-span-2 md:row-span-5',
+];
+
+export default function LifeAtCubeGrid({ content }: { content?: any }) {
+    const c = content ?? {};
+
+    const cards = (
+        Array.isArray(c.cards) && c.cards.length
+            ? c.cards.map((item: any, i: number) => ({
+                  image: item?.image || defaultCards[i]?.image || '/images/people-first.jpg',
+                  title: item?.title || '',
+                  text: item?.text || '',
+                  span: cardSpans[i] ?? 'md:col-span-2 md:row-span-5',
+              }))
+            : defaultCards.map((card: any, i: number) => ({ ...card, span: cardSpans[i] ?? 'md:col-span-2 md:row-span-5' }))
+    ).filter((card: any) => card.title);
+
     const videoRef = useRef<HTMLVideoElement>(null);
     const [isPlaying, setIsPlaying] = useState(false);
 
@@ -74,7 +95,7 @@ export default function LifeAtCubeGrid() {
     return (
         <>
             <NavbarThree />
-            <PageBanner title="Life at CubeGrid" image="/images/life-at-2.png" />
+            <PageBanner title={content?.banner_title || "Life at CubeGrid"} image={content?.banner_image || "/images/life-at-2.png"} />
             <MaxWidthWrapper className="pt-12 md:pt-24 pb-12 md:pb-20">
                 <div className="grid grid-cols-1 gap-10 md:grid-cols-2 lg:gap-24">
                     <motion.div
@@ -84,22 +105,25 @@ export default function LifeAtCubeGrid() {
                         transition={{ duration: 0.6 }}
                         className="flex flex-col justify-center items-center md:items-start text-center md:text-start"
                     >
-                        <TopLabel text="working at cubegrid" />
+                        <TopLabel text={c.intro_label || 'working at cubegrid'} />
                         <h2>
-                            We turn ambition into innovation with clean energy
-                            delivery.
+                            {c.intro_heading || 'We turn ambition into innovation with clean energy delivery.'}
                         </h2>
-                        <p>
-                            At CubeGrid, that is the work. We plan and build
-                            India's most critical transmission infrastructure —
-                            projects that power millions, enable renewable
-                            energy at scale, and demand the best of every person
-                            involved. Our teams bring engineering depth,
-                            stakeholder empathy, and an unrelenting drive to
-                            deliver. If you are drawn to work that is difficult
-                            by design and meaningful by outcome, CubeGrid is
-                            where you belong.
-                        </p>
+                        {c.intro_body ? (
+                            <div className="rich-text" dangerouslySetInnerHTML={{ __html: c.intro_body }} />
+                        ) : (
+                            <p>
+                                At CubeGrid, that is the work. We plan and build
+                                India's most critical transmission infrastructure —
+                                projects that power millions, enable renewable
+                                energy at scale, and demand the best of every person
+                                involved. Our teams bring engineering depth,
+                                stakeholder empathy, and an unrelenting drive to
+                                deliver. If you are drawn to work that is difficult
+                                by design and meaningful by outcome, CubeGrid is
+                                where you belong.
+                            </p>
+                        )}
                     </motion.div>
                     <motion.div
                         initial={{ opacity: 0, x: 50 }}
@@ -109,7 +133,7 @@ export default function LifeAtCubeGrid() {
                         className="h-full w-full overflow-hidden rounded-xl lg:rounded-3xl"
                     >
                         <img
-                            src="https://img.magnific.com/premium-photo/two-workers-inspecting-electrical-tower-sunset_204719-25797.jpg?w=720"
+                            src={c.intro_image || 'https://img.magnific.com/premium-photo/two-workers-inspecting-electrical-tower-sunset_204719-25797.jpg?w=720'}
                             alt="Aerial view of winding forest road"
                             className="h-full w-full object-cover"
                         />
@@ -124,180 +148,50 @@ export default function LifeAtCubeGrid() {
                     transition={{ duration: 0.5 }}
                     className="mb-12 flex flex-col items-center text-center"
                 >
-                    <h2>why CubeGrid</h2>
-                    <p className="md:max-w-3xl md:text-lg">
-                        CubeGrid global workforce of over 360 dedicated
-                        professionals is driven by a passion for enhancing
-                        essential infrastructure assets that will lead to a
-                        higher quality of life for all.
-                    </p>
+                    <h2>{c.why_heading || 'why CubeGrid'}</h2>
+                    {c.why_intro ? (
+                        <div className="rich-text md:max-w-3xl md:text-lg" dangerouslySetInnerHTML={{ __html: c.why_intro }} />
+                    ) : (
+                        <p className="md:max-w-3xl md:text-lg">
+                            CubeGrid global workforce of over 360 dedicated
+                            professionals is driven by a passion for enhancing
+                            essential infrastructure assets that will lead to a
+                            higher quality of life for all.
+                        </p>
+                    )}
                 </motion.div>
                 <div className="grid md:h-190 md:grid-cols-6 md:grid-rows-12 gap-4">
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                        whileInView={{ opacity: 1, scale: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.5, delay: 0.1 }}
-                        className="md:col-span-4 md:row-span-7"
-                    >
-                        <div className="group relative h-full w-full overflow-hidden rounded-xl bg-gray-200">
-                            <img
-                                src="https://img.magnific.com/free-photo/top-shot-three-unrecognizable-business-people-sitting-meeting-looking-charts_1098-17726.jpg?t=st=1792241025~exp=1792244625~hmac=100a759c5081eef1a5d98841b23cc139566da81014f60ff6a91ae0edcabdc6e2&w=1480"
-                                alt="People First"
-                                className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                            />
-                            <div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/35 to-transparent" />
-                            <div className="absolute right-3 bottom-3 left-3 overflow-hidden rounded-md text-white">
-                                <div className="relative z-10 p-4">
-                                    <h3 className="mb-0 font-heading text-2xl drop-shadow-sm">
-                                        We take a rigorous & analytical approach
-                                        to risk
-                                    </h3>
-                                </div>
-
-                                <div className="max-h-0 overflow-hidden transition-all duration-1000 ease-out group-hover:max-h-50">
-                                    <p className="mb-0 px-4 pb-4 font-medium drop-shadow-sm">
-                                        We take a deeply analytical approach to
-                                        investing and have a carefully curated
-                                        risk management framework. One of our
-                                        risk management tools includes a “double
-                                        underwrite” methodology, where an
-                                        entirely separate team reviews a deal
-                                        teams’ analysis and proposal.
-                                    </p>
+                    {cards.map((card: any, i: number) => (
+                        <motion.div
+                            key={i}
+                            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                            whileInView={{ opacity: 1, scale: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.5, delay: 0.1 + i * 0.1 }}
+                            className={card.span}
+                        >
+                            <div className="group relative h-full w-full overflow-hidden rounded-xl bg-gray-200">
+                                <img
+                                    src={card.image}
+                                    alt={card.title}
+                                    className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                                />
+                                <div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/35 to-transparent" />
+                                <div className="absolute right-3 bottom-3 left-3 overflow-hidden rounded-md text-white">
+                                    <div className="relative z-10 p-4">
+                                        <h3 className="mb-0 font-heading text-2xl drop-shadow-sm">
+                                            {card.title}
+                                        </h3>
+                                    </div>
+                                    <div className="max-h-0 overflow-hidden transition-all duration-1000 ease-out group-hover:max-h-50">
+                                        <p className="mb-0 px-4 pb-4 font-medium drop-shadow-sm">
+                                            {card.text}
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    </motion.div>
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                        whileInView={{ opacity: 1, scale: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.5, delay: 0.2 }}
-                        className="md:col-span-2 md:row-span-6"
-                    >
-                        <div className="group relative h-full w-full overflow-hidden rounded-xl bg-gray-200">
-                            <img
-                                src="images/team.jpg"
-                                alt="People First"
-                                className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                            />
-                            <div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/35 to-transparent" />
-                            <div className="absolute right-3 bottom-3 left-3 overflow-hidden rounded-md text-white">
-                                <div className="relative z-10 p-4">
-                                    <h3 className="mb-0 font-heading text-2xl drop-shadow-sm">
-                                        People First
-                                    </h3>
-                                </div>
-                                <div className="max-h-0 overflow-hidden transition-all duration-1000 ease-out group-hover:max-h-50">
-                                    <p className="mb-0 px-4 pb-4 font-medium drop-shadow-sm">
-                                        Performance is built on people, powered
-                                        by trust and respect
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </motion.div>
-
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                        whileInView={{ opacity: 1, scale: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.5, delay: 0.3 }}
-                        className="md:col-span-2 md:row-span-6"
-                    >
-                        <div className="group relative h-full w-full overflow-hidden rounded-xl bg-gray-200">
-                            <img
-                                src="https://img.magnific.com/free-vector/worldwide-connection-blue-background-illustration-vector_53876-76812.jpg?t=st=1792240947~exp=1792244547~hmac=7c004d7591c333b1a0567197e807111a621372e73aaac31c92cb8e59e14d0eae&w=1480"
-                                alt="People First"
-                                className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                            />
-                            <div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/35 to-transparent" />
-                            <div className="absolute right-3 bottom-3 left-3 overflow-hidden rounded-md text-white">
-                                <div className="relative z-10 p-4">
-                                    <h3 className="mb-0 font-heading text-2xl drop-shadow-sm">
-                                        We value global perspectives and local
-                                        insights
-                                    </h3>
-                                </div>
-                                <div className="max-h-0 overflow-hidden transition-all duration-1000 ease-out group-hover:max-h-50">
-                                    <p className="mb-0 px-4 pb-4 font-medium drop-shadow-sm">
-                                        We have a global network of nine
-                                        offices, but we also value local
-                                        insights that offer operational,
-                                        technical, and regulatory insights that
-                                        give us an advantage.
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </motion.div>
-
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                        whileInView={{ opacity: 1, scale: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.5, delay: 0.4 }}
-                        className="md:col-span-2 md:row-span-5"
-                    >
-                        <div className="group relative h-full w-full overflow-hidden rounded-xl bg-gray-200">
-                            <img
-                                src="images/transmission-infra.jpg"
-                                alt="People First"
-                                className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                            />
-                            <div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/35 to-transparent" />
-                            <div className="absolute right-3 bottom-3 left-3 overflow-hidden rounded-md text-white">
-                                <div className="relative z-10 p-4">
-                                    <h3 className="mb-0 font-heading text-2xl drop-shadow-sm">
-                                        We are business builders at our core
-                                    </h3>
-                                </div>
-                                <div className="max-h-0 overflow-hidden transition-all duration-1000 ease-out group-hover:max-h-50">
-                                    <p className="mb-0 px-4 pb-4 font-medium drop-shadow-sm">
-                                        We value entrepreneurial capabilities
-                                        but also encourage collaboration because
-                                        we work in an environment where input
-                                        from every team member contributes to
-                                        the firm’s success.
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </motion.div>
-
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                        whileInView={{ opacity: 1, scale: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.5, delay: 0.5 }}
-                        className="md:col-span-2 md:row-span-5"
-                    >
-                        <div className="group relative h-full w-full overflow-hidden rounded-xl bg-gray-200">
-                            <img
-                                src="https://img.magnific.com/free-photo/people-working-project-laptop_23-2147707784.jpg?t=st=1792240893~exp=1792244493~hmac=9da28d4b8a6eb3fc265d698bf47765f71ab074c1efdf4d538005094f589edafe&w=1480"
-                                alt="People First"
-                                className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                            />
-                            <div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/35 to-transparent" />
-                            <div className="absolute right-3 bottom-3 left-3 overflow-hidden rounded-md text-white">
-                                <div className="relative z-10 p-4">
-                                    <h3 className="mb-0 font-heading text-2xl drop-shadow-sm">
-                                        We support each other to do our best
-                                        work
-                                    </h3>
-                                </div>
-                                <div className="max-h-0 overflow-hidden transition-all duration-1000 ease-out group-hover:max-h-50">
-                                    <p className="mb-0 px-4 pb-4 font-medium drop-shadow-sm">
-                                        Our team members thrive on motivating
-                                        each other to reach new heights while
-                                        providing a supportive network that
-                                        empowers everyone to succeed.
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </motion.div>
+                        </motion.div>
+                    ))}
                 </div>
 
                 <div className="relative mt-20 hidden aspect-video overflow-hidden rounded-2xl">
@@ -361,21 +255,20 @@ export default function LifeAtCubeGrid() {
                             <div className="mx-auto flex max-w-3xl flex-col items-center text-center">
                                 <div className="mb-3 flex items-center md:mb-6">
                                     <span className="text-sm font-semibold tracking-widest text-white uppercase">
-                                        Careers
+                                        {c.cta_label || 'Careers'}
                                     </span>
                                 </div>
                                 <h2 className="mb-8 text-white">
-                                    BUILD YOUR FUTURE WITH A TEAM THAT POWERS
-                                    PROGRESS
+                                    {c.cta_heading || 'BUILD YOUR FUTURE WITH A TEAM THAT POWERS PROGRESS'}
                                 </h2>
 
                                 {/* Call to Action Button */}
                                 <div className="flex">
                                     <Link
-                                        href="/career"
+                                        href={c.cta_link || '/career'}
                                         className="flex items-center gap-2 rounded-md bg-white px-6 py-4 text-black transition-all duration-300 hover:bg-black hover:text-white"
                                     >
-                                        View Open Vacancies
+                                        {c.cta_button || 'View Open Vacancies'}
                                         <ArrowRight size={20} />
                                     </Link>
                                 </div>

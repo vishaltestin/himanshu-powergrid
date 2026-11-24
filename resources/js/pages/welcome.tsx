@@ -11,10 +11,33 @@ import OurBusiness from '@/components/home/our-business';
 import SustainabilityCsr from '@/components/home/sustainability-csr';
 import MaxWidthWrapper from '@/components/max-width-wrapper';
 import { NavbarThree } from '@/components/navbar-3';
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import { motion, Variants } from 'framer-motion';
 
-export default function Welcome() {
+export default function Welcome({ content }: { content?: any }) {
+    const { settings } = usePage<any>().props;
+    let investorParsed: any = null;
+    try {
+        investorParsed = settings?.investor_section ? JSON.parse(settings.investor_section) : null;
+    } catch {
+        investorParsed = null;
+    }
+    const investor = {
+        label: 'Our Investor',
+        title: 'I Squared Capital',
+        subtitle: 'Cube Grid Advisors is a portfolio company of I Squared Capital.',
+        description:
+            'I Squared Capital is a leading global infrastructure investment manager with $50 billion+ in assets under management. Founded in 2012, I Squared builds and scales essential infrastructure businesses across global markets.',
+        image: '/images/client/isqaure-2.png',
+        stats: [
+            { value: '$60B+', label: 'Assets under management' },
+            { value: '115+', label: 'Countries with investment' },
+            { value: '100+', label: 'Portfolio companies globally' },
+            { value: '360+', label: 'Infrastructure professionals' },
+        ],
+        ...(investorParsed || {}),
+    };
+
     const statsContainerVariants: Variants = {
         hidden: { opacity: 0 },
         visible: {
@@ -446,44 +469,22 @@ export default function Welcome() {
                         {/* Copy */}
                         <div className="order-2 lg:order-1 lg:col-span-7">
                             <p className="mb-4 text-xs font-semibold tracking-[0.24em] text-[#4fa3cc] uppercase md:mb-6 md:text-sm">
-                                Our Investor
+                                {investor.label}
                             </p>
 
                             <h2 className="bg-linear-to-b from-white to-[#9cc9e6] bg-clip-text text-transparent">
-                                I Squared Capital
+                                {investor.title}
                             </h2>
 
                             <p className="mb-3 text-lg leading-relaxed font-medium md:text-xl">
-                                Cube Grid Advisors is a portfolio company of I
-                                Squared Capital.
+                                {investor.subtitle}
                             </p>
                             <p className="mb-10 max-w-xl leading-relaxed text-white">
-                                I Squared Capital is a leading global
-                                infrastructure investment manager with $50
-                                billion+ in assets under management. Founded in
-                                2012, I Squared builds and scales essential
-                                infrastructure businesses across global markets.
+                                {investor.description}
                             </p>
 
                             <dl className="investor-stats">
-                                {[
-                                    {
-                                        value: '$60B+',
-                                        label: 'Assets under management',
-                                    },
-                                    {
-                                        value: '115+',
-                                        label: 'Countries with investment',
-                                    },
-                                    {
-                                        value: '100+',
-                                        label: 'Portfolio companies globally',
-                                    },
-                                    {
-                                        value: '360+',
-                                        label: 'Infrastructure professionals',
-                                    },
-                                ].map((stat, i) => (
+                                {investor.stats.map((stat: any) => (
                                     <div
                                         key={stat.label}
                                         className="investor-stat"
@@ -505,7 +506,7 @@ export default function Welcome() {
                             <div className="investor-visual">
                                 <div className="investor-frame">
                                     <img
-                                        src="/images/client/isqaure-2.png"
+                                        src={investor.image}
                                         alt=""
                                         className="w-60"
                                     />
@@ -525,7 +526,7 @@ export default function Welcome() {
             {/* <Clients /> */}
             <SustainabilityCsr />
             {/* <NewsAndUpdatesTwo /> */}
-            <PowerCTA />
+            <PowerCTA content={content} />
             {/* <FormSection /> */}
             <Footer />
         </>

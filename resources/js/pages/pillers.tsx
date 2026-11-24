@@ -7,7 +7,7 @@ import { Link } from '@inertiajs/react';
 import { ArrowUpRight, Circle, Droplet, Home, Plug, Radiation, Zap } from 'lucide-react';
 import React from 'react'
 
-const services = [
+const defaultServices = [
     {
         title: 'Transmission Infrastructure',
         href: '/pillar/transmission-infrastructure',
@@ -102,26 +102,45 @@ const services = [
 ];
 
 
-function Pillers() {
+function Pillers({ content }: { content?: any }) {
+    const c = content ?? {};
+
+    const services = (
+        Array.isArray(c.services) && c.services.length
+            ? c.services.map((item: any, i: number) => ({
+                  title: item?.title || '',
+                  href: item?.href || defaultServices[i]?.href || '/pillers',
+                  subtitle: item?.subtitle || '',
+                  desc: item?.desc || '',
+                  image: item?.image || defaultServices[i]?.image || '/images/transmission-infra-2.png',
+                  icon: defaultServices[i]?.icon,
+              }))
+            : defaultServices
+    ).filter((item: any) => item.title);
+
     return (
         <>
             <NavbarThree />
-            <PageBanner title="Our Pillars" image='/images/business-2.jpg' />
+            <PageBanner title={content?.banner_title || "Our Pillars"} image={content?.banner_image || "/images/business-2.jpg"} />
             <section className="relative pt-24 pb-10 md:pb-16">
                 <MaxWidthWrapper className="relative z-10">
                     <div className="mb-8 md:mb-12 flex flex-col items-center text-center">
-                        <TopLabel text="Our Six Pillars" />
+                        <TopLabel text={c.section_label || 'Our Six Pillars'} />
 
-                        <h2>Smart Solutions for Power Transmission</h2>
+                        <h2>{c.section_heading || 'Smart Solutions for Power Transmission'}</h2>
 
-                        <p className="md:max-w-3xl md:text-lg">
-                            An integrated platform building complex infrastructure
-                            across the full energy value chain
-                        </p>
+                        {c.section_intro ? (
+                            <div className="rich-text md:max-w-3xl md:text-lg" dangerouslySetInnerHTML={{ __html: c.section_intro }} />
+                        ) : (
+                            <p className="md:max-w-3xl md:text-lg">
+                                An integrated platform building complex infrastructure
+                                across the full energy value chain
+                            </p>
+                        )}
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-12">
-                        {services.map((service, index) => (
+                        {services.map((service: any, index: number) => (
                             <Link href={service.href} className="group relative flex h-full flex-col overflow-hidden transition-all duration-300 hover:-translate-y-3 hover:ring-accent/30">
                                 <div className="relative mb-2 h-60 md:h-90 overflow-hidden rounded-xl">
                                     <img

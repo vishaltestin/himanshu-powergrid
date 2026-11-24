@@ -18,7 +18,8 @@ interface Pillar {
     subtitle: string;
 }
 
-export default function PillarDetail({ alias }: { alias: string }) {
+export default function PillarDetail({ alias, content }: { alias: string; content?: any }) {
+    const c = content ?? {};
     const pillar: Pillar | undefined = pillarsData.find(
         (item) => item.alias === alias,
     );
@@ -27,25 +28,37 @@ export default function PillarDetail({ alias }: { alias: string }) {
         return <div>Pillar not found</div>;
     }
 
+    const resolved: Pillar = {
+        title: c.pillar_title || pillar.title,
+        desc: c.pillar_desc || pillar.desc,
+        alias: pillar.alias,
+        image: c.pillar_image || pillar.image,
+        subtitle: c.pillar_subtitle || pillar.subtitle,
+        features:
+            (Array.isArray(c.features) && c.features.length
+                ? c.features.map((f: any) => f?.feature ?? f).filter(Boolean)
+                : pillar.features),
+    };
+
     return (
         <>
-            <Head title={pillar.title} />
+            <Head title={resolved.title} />
             <NavbarThree />
-            <PageBanner title="Our Pillars" image='/images/business-2.jpg' />
+            <PageBanner title={content?.banner_title || "Our Pillars"} image={content?.banner_image || "/images/business-2.jpg"} />
             <MaxWidthWrapper>
                 <section className="pt-10 pb-8 lg:pt-24 lg:pb-10">
                     <div className="grid items-start gap-4 lg:gap-10 lg:grid-cols-[1fr_0.8fr]">
                         <div>
                             <p className="mb-5 font-semibold text-accent uppercase">
-                                {pillar.subtitle}
+                                {resolved.subtitle}
                             </p>
 
                             <h1 className="font-heading text-3xl md:text-5xl lg:text-6xl">
-                                {pillar.title}
+                                {resolved.title}
                             </h1>
                         </div>
                         <div>
-                            <p className="md:text-lg">{pillar.desc}</p>
+                            <p className="md:text-lg">{resolved.desc}</p>
                         </div>
                     </div>
                 </section>
@@ -53,26 +66,31 @@ export default function PillarDetail({ alias }: { alias: string }) {
             <MaxWidthWrapper className="max-w-6xl">
                 <div className="aspect-2/1 overflow-hidden rounded-xl bg-gray-100">
                     <img
-                        src={pillar.image}
-                        alt={pillar.title}
+                        src={resolved.image}
+                        alt={resolved.title}
                         className="h-full w-full object-cover"
                     />
                 </div>
 
                 <div className="pt-4 lg:pt-20">
                     <h3 className="mb-4 lg:mb-8 text-xl md:text-2xl lg:text-4xl font-semibold">
-                        Building the infrastructure behind India's energy
-                        future.
+                        {c.section_heading || "Building the infrastructure behind India's energy future."}
                     </h3>
 
-                    <p>{pillar.desc}</p>
+                    {c.section_body ? (
+                        <div className="rich-text" dangerouslySetInnerHTML={{ __html: c.section_body }} />
+                    ) : (
+                        <>
+                            <p>{resolved.desc}</p>
 
-                    <p>
-                        Our approach combines technical expertise, disciplined
-                        execution, and long-term thinking to develop
-                        infrastructure capable of supporting India's rapidly
-                        evolving energy requirements.
-                    </p>
+                            <p>
+                                Our approach combines technical expertise, disciplined
+                                execution, and long-term thinking to develop
+                                infrastructure capable of supporting India's rapidly
+                                evolving energy requirements.
+                            </p>
+                        </>
+                    )}
                 </div>
 
                 <section className="pb-10 lg:pb-20">
@@ -83,7 +101,7 @@ export default function PillarDetail({ alias }: { alias: string }) {
                     </div> */}
 
                     <div className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-                        {pillar.features.map((tag) => (
+                        {resolved.features.map((tag: string) => (
                             <div
                                 key={tag}
                                 className="group flex items-center gap-3 rounded-xl border border-gray-200/80 bg-white/70 p-3 shadow-xs backdrop-blur-xs transition-all hover:border-accent/40 hover:bg-white hover:shadow-sm"
@@ -117,15 +135,15 @@ export default function PillarDetail({ alias }: { alias: string }) {
                         <div className="relative z-10 flex items-center justify-center px-4 py-12 text-center sm:px-10 md:min-h-100 md:px-6 md:py-16">
                             <div className="mx-auto max-w-5xl">
                                 <h2 className="text-4xl text-white sm:text-5xl md:text-6xl lg:text-6xl">
-                                    Let's Build Your Next Energy Project
+                                    {c.cta_heading || "Let's Build Your Next Energy Project"}
                                 </h2>
                                 <p className="mx-auto mt-6 text-base text-white md:max-w-2xl md:text-lg">
-                                    Whether you're planning a new project or exploring a partnership, we're ready to understand your requirements and help you take the next step.
+                                    {c.cta_text || "Whether you're planning a new project or exploring a partnership, we're ready to understand your requirements and help you take the next step."}
                                 </p>
                                 <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
                                     <ThemeButton
-                                        text="Enquire Now"
-                                        link="/enquiry"
+                                        text={c.cta_button || 'Enquire Now'}
+                                        link={c.cta_link || '/enquiry'}
                                     />
                                 </div>
                             </div>

@@ -23,7 +23,7 @@ interface CertificateItem {
     issuedYear?: string;
 }
 
-const CERTIFICATES: CertificateItem[] = [
+const DEFAULT_CERTIFICATES: CertificateItem[] = [
     {
         id: 1,
         title: 'Coming Soon',
@@ -70,7 +70,24 @@ const CERTIFICATES: CertificateItem[] = [
     },
 ];
 
-function Certificate() {
+function Certificate({ content }: { content?: any }) {
+    const c = content ?? {};
+
+    const CERTIFICATES: CertificateItem[] = (
+        Array.isArray(c.certificates) && c.certificates.length
+            ? c.certificates.map((item: any, i: number) => ({
+                  id: i + 1,
+                  title: item?.title || 'Coming Soon',
+                  category: item?.category || '',
+                  description: item?.description || '',
+                  image: item?.image || '/images/certificate.jpg',
+                  pdfUrl: item?.pdf_url || '#',
+                  fileSize: item?.file_size || '',
+                  issuedYear: item?.issued_year || '',
+              }))
+            : DEFAULT_CERTIFICATES
+    ).filter((item: any) => item.title || item.category);
+
     const [selectedImage, setSelectedImage] = useState<CertificateItem | null>(
         null,
     );
@@ -78,16 +95,18 @@ function Certificate() {
     return (
         <>
             <NavbarThree />
-            <PageBanner title="Certifications" 
-            image='/images/certi.png'
-            />
+            <PageBanner title={content?.banner_title || "Certifications"} image={content?.banner_image || "/images/certi.png"} />
             <MaxWidthWrapper className="py-24">
                 <div className="mb-8 flex flex-col items-center text-center md:mb-12">
-                    <h2>Verified Accreditations</h2>
-                    <p className="md:max-w-4xl md:text-lg">
-                        All certifications are vetted annually by accredited
-                        global auditing boards.
-                    </p>
+                    <h2>{c.section_heading || 'Verified Accreditations'}</h2>
+                    {c.section_intro ? (
+                        <div className="rich-text md:max-w-4xl md:text-lg" dangerouslySetInnerHTML={{ __html: c.section_intro }} />
+                    ) : (
+                        <p className="md:max-w-4xl md:text-lg">
+                            All certifications are vetted annually by accredited
+                            global auditing boards.
+                        </p>
+                    )}
                 </div>
                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                     {CERTIFICATES.map((cert) => (

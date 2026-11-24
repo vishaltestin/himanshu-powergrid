@@ -10,6 +10,12 @@ import path from 'path';
 export default defineConfig({
     // base: '/hk/vasundhara-2/build/',
 
+    build: {
+        // 'public/build' is excluded from workspace persistence; keep assets in a persisted dir
+        outDir: 'public/site-build',
+        emptyOutDir: true,
+    },
+
     resolve: {
         alias: {
             '@': path.resolve(__dirname, './resources/js'),
@@ -18,7 +24,7 @@ export default defineConfig({
     
     plugins: [
         laravel({
-            input: ['resources/css/app.css', 'resources/js/app.tsx', 'resources/css/admin.css', 'resources/js/admin/admin.js', 'resources/js/admin/bootstrap.js'],
+            input: ['resources/css/app.css', 'resources/js/app.tsx'],
             refresh: true,
             // fonts: [
             //     bunny('Instrument Sans', {

@@ -3,7 +3,8 @@ import MaxWidthWrapper from '../max-width-wrapper';
 import TopLabel from '../common/top-label';
 import ThemeButton from '../common/theme-button';
 
-function PowerCTA() {
+function PowerCTA({ content }: { content?: any }) {
+    const c = content ?? {};
     return (
         <section className="pt-8 md:pb-16">
             <MaxWidthWrapper className='max-w-full px-0 md:max-w-346'>
@@ -26,7 +27,7 @@ function PowerCTA() {
                                 </span>
                             </div> */}
                             <h2 className="text-4xl text-white sm:text-5xl md:text-6xl lg:text-6xl">
-                                Empowering the Future of Energy Transmission
+                                {c.cta_heading || 'Empowering the Future of Energy Transmission'}
                             </h2>
                             <p className="mx-auto mt-6 md:max-w-2xl text-base text-white md:text-lg">
                                 Reliable transmission solutions engineered to

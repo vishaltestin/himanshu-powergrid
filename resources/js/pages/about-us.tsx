@@ -1,6 +1,7 @@
 import PageBanner from '@/components/common/page-banner';
 import ThemeButton from '@/components/common/theme-button';
 import TopLabel from '@/components/common/top-label';
+import { lines } from '@/components/common/rich';
 import Footer from '@/components/footer';
 import { AnimatedStat } from '@/components/home/leadership';
 import MaxWidthWrapper from '@/components/max-width-wrapper';
@@ -27,7 +28,7 @@ interface ValueItem {
     inPractice: string[];
 }
 
-const values: ValueItem[] = [
+const defaultValues: ValueItem[] = [
     {
         icon: '/images/icons/high-voltage.png',
         title: 'Integrity',
@@ -97,7 +98,7 @@ const values: ValueItem[] = [
     },
 ];
 
-const initiatives = [
+const defaultInitiatives = [
     {
         label: 'Transmission — HVAC / HVDC / Substations',
         icon: UtilityPole,
@@ -124,18 +125,41 @@ const initiatives = [
     // },
 ];
 
-export default function AboutUs() {
+export default function AboutUs({ content }: { content?: any }) {
+    const c = content ?? {};
+
+    const initiatives = (
+        Array.isArray(c.initiatives) && c.initiatives.length
+            ? c.initiatives.map((item: any, i: number) => ({
+                  label: item?.label || defaultInitiatives[i]?.label || '',
+                  icon: defaultInitiatives[i]?.icon || UtilityPole,
+              }))
+            : defaultInitiatives
+    ).filter((item: any) => item.label);
+
+    const values: ValueItem[] = (
+        Array.isArray(c.values) && c.values.length
+            ? c.values.map((item: any, i: number) => ({
+                  icon: item?.icon || defaultValues[i]?.icon || '/images/icons/grid.png',
+                  title: item?.title || '',
+                  subtitle: item?.subtitle || '',
+                  description: item?.description || '',
+                  inPractice: lines(item?.in_practice),
+              }))
+            : defaultValues
+    ).filter((item: any) => item.title);
+
     const [selectedValue, setSelectedValue] = useState<ValueItem | null>(null);
     return (
         <>
             <NavbarThree />
-            <PageBanner title="About Us" image="/images/about-us-banner.webp" />
+            <PageBanner title={content?.banner_title || "About Us"} image={content?.banner_image || "/images/about-us-banner.webp"} />
             <MaxWidthWrapper className="pt-12 md:pt-24 md:pb-16">
                 <div className="grid grid-cols-1 gap-12 lg:grid-cols-[1fr_1.2fr] lg:gap-18">
                     <div className="relative mx-auto w-full max-w-lg lg:mx-0 lg:max-w-none">
                         <div className="h-full w-full overflow-hidden rounded-3xl">
                             <img
-                                src="/images/forest-power-grid.jpg"
+                                src={c.who_image || '/images/forest-power-grid.jpg'}
                                 alt="Welder working in a workshop"
                                 className="aspect-square w-full object-cover lg:aspect-auto lg:h-full"
                             />
@@ -183,41 +207,53 @@ export default function AboutUs() {
                         </div> */}
                     </div>
                     <div className="flex flex-col justify-center">
-                        <TopLabel text="Who We Are" />
-                        <h2>We Build Complex Infrastructure</h2>
+                        <TopLabel text={c.who_label || 'Who We Are'} />
+                        <h2>{c.who_title || 'We Build Complex Infrastructure'}</h2>
                         <p className="font-medium md:text-lg">
-                            Where Others See Complexity, We See Opportunity
+                            {c.who_lead || 'Where Others See Complexity, We See Opportunity'}
                         </p>
-                        <p>
-                            Cube Grid Advisors is a portfolio company of I
-                            Squared Capital — the leading independent global
-                            infrastructure investor managing $70 billion+ in
-                            assets. We are an integrated energy infrastructure
-                            platform focused on identifying, developing,
-                            constructing, operating, and scaling complex assets
-                            across India's power value chain.
-                        </p>
+                        {c.who_p1 ? (
+                            <div className="rich-text" dangerouslySetInnerHTML={{ __html: c.who_p1 }} />
+                        ) : (
+                            <p>
+                                Cube Grid Advisors is a portfolio company of I
+                                Squared Capital — the leading independent global
+                                infrastructure investor managing $70 billion+ in
+                                assets. We are an integrated energy infrastructure
+                                platform focused on identifying, developing,
+                                constructing, operating, and scaling complex assets
+                                across India's power value chain.
+                            </p>
+                        )}
 
-                        <p>
-                            India's energy transition demands ₹2.44 lakh crore
-                            in new transmission infrastructure, which include
-                            EHVAC and HVDC transmission lines, large AC
-                            sub-stations, HVDC terminals and FACTS devices.
-                            These complex projects require deep domain
-                            expertise, institutional capital, and the tenacity
-                            to deliver in challenging regulatory and terrain
-                            environments.
-                        </p>
-                        <p>
-                            Our leadership brings 150+ years of combined
-                            experience — each CXO with 30+ years of hands-on
-                            experience developing, constructing, and operating
-                            energy infrastructure at scale. From India's first
-                            HVDC lines to next-generation SMR nuclear plants,
-                            we've done it before.
-                        </p>
+                        {c.who_p2 ? (
+                            <div className="rich-text" dangerouslySetInnerHTML={{ __html: c.who_p2 }} />
+                        ) : (
+                            <p>
+                                India's energy transition demands ₹2.44 lakh crore
+                                in new transmission infrastructure, which include
+                                EHVAC and HVDC transmission lines, large AC
+                                sub-stations, HVDC terminals and FACTS devices.
+                                These complex projects require deep domain
+                                expertise, institutional capital, and the tenacity
+                                to deliver in challenging regulatory and terrain
+                                environments.
+                            </p>
+                        )}
+                        {c.who_p3 ? (
+                            <div className="rich-text" dangerouslySetInnerHTML={{ __html: c.who_p3 }} />
+                        ) : (
+                            <p>
+                                Our leadership brings 150+ years of combined
+                                experience — each CXO with 30+ years of hands-on
+                                experience developing, constructing, and operating
+                                energy infrastructure at scale. From India's first
+                                HVDC lines to next-generation SMR nuclear plants,
+                                we've done it before.
+                            </p>
+                        )}
                         {/* <ul className="mt-2 grid grid-cols-2 space-y-3 md:space-y-4">
-                            {initiatives.map(({ label, icon: Icon }, index) => (
+                            {initiatives.map(({ label, icon: Icon }: any, index: number) => (
                                 <li
                                     key={index}
                                     className="flex items-start gap-3 md:gap-4"
@@ -236,7 +272,7 @@ export default function AboutUs() {
                             ))}
                         </ul> */}
                         <ul className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-2 md:gap-4 lg:grid-cols-2">
-                            {initiatives.map(({ label, icon: Icon }, index) => (
+                            {initiatives.map(({ label, icon: Icon }: any, index: number) => (
                                 <li
                                     key={index}
                                     className="group flex flex-col gap-4 rounded-2xl border border-gray-200 bg-white p-3 transition-all duration-300 hover:-translate-y-1 hover:border-primary/20 hover:shadow-lg md:p-4"
@@ -257,7 +293,7 @@ export default function AboutUs() {
                     </div>
                 </div>
                 {/* <ul className="mt-12 grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-4 lg:grid-cols-6">
-                    {initiatives.map(({ label, icon: Icon }, index) => (
+                    {initiatives.map(({ label, icon: Icon }: any, index: number) => (
                         <li
                             key={index}
                             className="group flex flex-col gap-4 rounded-2xl border border-gray-200 bg-white p-3 transition-all duration-300 hover:-translate-y-1 hover:border-primary/20 hover:shadow-lg md:p-4"
@@ -386,11 +422,9 @@ export default function AboutUs() {
             <section className="pt-10 pb-20" id="vission-mission">
                 <MaxWidthWrapper>
                     <div className="mb-12 text-center md:mb-16">
-                        <h2>Our Vision & Mission</h2>
+                        <h2>{c.vm_heading || 'Our Vision & Mission'}</h2>
                         <p className="mx-auto max-w-2xl md:text-lg">
-                            The guiding principles that drive our commitment to
-                            building sustainable, resilient, and highly complex
-                            energy infrastructure for tomorrow.
+                            {c.vm_intro || 'The guiding principles that drive our commitment to building sustainable, resilient, and highly complex energy infrastructure for tomorrow.'}
                         </p>
                     </div>
 
@@ -479,21 +513,25 @@ export default function AboutUs() {
                             </div>
 
                             <p className="relative mb-3 text-xs font-semibold tracking-[0.2em] text-accent uppercase">
-                                Where we're headed
+                                {c.vision_label || "Where we're headed"}
                             </p>
                             <h3 className="relative mb-5 text-3xl font-semibold tracking-tight text-black md:text-4xl">
-                                Our Vision
+                                {c.vision_title || 'Our Vision'}
                             </h3>
-                            <p className="relative mb-0 text-base md:text-lg">
-                                To be the premier energy infrastructure
-                                platform, bridging the gap between complexity
-                                and execution to power India's sustainable and
-                                resilient future. We envision a smarter, more
-                                connected energy ecosystem driven by innovation,
-                                operational excellence, and sustainable
-                                infrastructure that creates long-term value for
-                                communities, industries, and future generations.
-                            </p>
+                            {c.vision_text ? (
+                                <div className="rich-text relative mb-0 text-base md:text-lg" dangerouslySetInnerHTML={{ __html: c.vision_text }} />
+                            ) : (
+                                <p className="relative mb-0 text-base md:text-lg">
+                                    To be the premier energy infrastructure
+                                    platform, bridging the gap between complexity
+                                    and execution to power India's sustainable and
+                                    resilient future. We envision a smarter, more
+                                    connected energy ecosystem driven by innovation,
+                                    operational excellence, and sustainable
+                                    infrastructure that creates long-term value for
+                                    communities, industries, and future generations.
+                                </p>
+                            )}
                         </article>
 
                         <article className="group relative flex flex-col overflow-hidden rounded-2xl bg-white p-8 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_24px_-12px_rgba(0,0,0,0.08)] ring ring-accent/20 transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_20px_50px_-20px_rgba(0,0,0,0.18)] md:p-8">
@@ -509,22 +547,26 @@ export default function AboutUs() {
                             </div>
 
                             <p className="relative mb-3 text-xs font-semibold tracking-[0.2em] text-accent uppercase">
-                                What we do
+                                {c.mission_label || 'What we do'}
                             </p>
                             <h3 className="relative mb-5 text-3xl font-semibold tracking-tight text-black md:text-4xl">
-                                Our Mission
+                                {c.mission_title || 'Our Mission'}
                             </h3>
-                            <p className="relative mb-0 text-base md:text-lg">
-                                To identify, develop, and scale highly complex
-                                energy assets with precision and domain
-                                expertise, delivering long-term value to our
-                                stakeholders and communities. We are committed
-                                to transforming the energy landscape through
-                                strategic investments, innovative solutions, and
-                                efficient project execution. By combining
-                                technical excellence with a forward-thinking
-                                approach.
-                            </p>
+                            {c.mission_text ? (
+                                <div className="rich-text relative mb-0 text-base md:text-lg" dangerouslySetInnerHTML={{ __html: c.mission_text }} />
+                            ) : (
+                                <p className="relative mb-0 text-base md:text-lg">
+                                    To identify, develop, and scale highly complex
+                                    energy assets with precision and domain
+                                    expertise, delivering long-term value to our
+                                    stakeholders and communities. We are committed
+                                    to transforming the energy landscape through
+                                    strategic investments, innovative solutions, and
+                                    efficient project execution. By combining
+                                    technical excellence with a forward-thinking
+                                    approach.
+                                </p>
+                            )}
                         </article>
                     </div>
                 </MaxWidthWrapper>
@@ -532,10 +574,9 @@ export default function AboutUs() {
             <section className="bg-[#f4f4f4] pt-16 pb-20" id="values">
                 <MaxWidthWrapper>
                     <div className="mb-10 flex flex-col items-center text-center">
-                        <h2>Our Core Values</h2>
+                        <h2>{c.values_heading || 'Our Core Values'}</h2>
                         <p className="md:text-lg">
-                            Five values. One culture. Every project, every
-                            decision.
+                            {c.values_intro || 'Five values. One culture. Every project, every decision.'}
                         </p>
                     </div>
 

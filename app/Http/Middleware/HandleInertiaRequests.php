@@ -2,7 +2,9 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\FormSubmission;
 use App\Models\Menu;
+use App\Models\Setting;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -53,6 +55,15 @@ class HandleInertiaRequests extends Middleware
                 }])
                 ->orderBy('order')
                 ->get(),
+
+            'settings' => fn () => Setting::pluck('value', 'key')->all(),
+
+            'admin' => [
+                'newSubmissionCount' => fn () => $request->user()
+                    && $request->user()->hasAnyRole(['root', 'admin'])
+                    ? FormSubmission::where('status', 'new')->count()
+                    : 0,
+            ],
         ]);
     }
 }

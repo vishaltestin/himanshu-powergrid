@@ -16,7 +16,7 @@ interface Stat {
     label: string;
 }
 
-const stats: Stat[] = [
+const defaultStats: Stat[] = [
     { prefix: '$', to: 60, suffix: 'B', label: 'Assets Under Mgmt' },
     { to: 100, suffix: '+', label: 'Portfolio Companies' },
     { to: 115, suffix: '+', label: 'Countries' },
@@ -33,7 +33,7 @@ interface Platform {
     highlight?: boolean;
 }
 
-const platforms: Platform[] = [
+const defaultPlatforms: Platform[] = [
     {
         icon: '/images/client/cube-highway.png',
         name: 'Cube Highways',
@@ -85,11 +85,37 @@ const fadeUp = {
     viewport: { once: true, margin: '-60px' },
 };
 
-export default function OurInvestor() {
+export default function OurInvestor({ content }: { content?: any }) {
+    const c = content ?? {};
+
+    const stats: Stat[] = (
+        Array.isArray(c.stats) && c.stats.length
+            ? c.stats.map((item: any) => ({
+                  prefix: item?.prefix || undefined,
+                  to: Number(item?.value) || 0,
+                  suffix: item?.suffix || undefined,
+                  plain: !!item?.plain,
+                  label: item?.label || '',
+              }))
+            : defaultStats
+    ).filter((item: any) => item.label);
+
+    const platforms: Platform[] = (
+        Array.isArray(c.platforms) && c.platforms.length
+            ? c.platforms.map((item: any, i: number) => ({
+                  icon: item?.icon || defaultPlatforms[i]?.icon || '/images/logo-new-transparent.png',
+                  name: item?.name || '',
+                  tag: item?.tag || '',
+                  description: item?.description || '',
+                  highlight: !!item?.highlight,
+              }))
+            : defaultPlatforms
+    ).filter((item: any) => item.name);
+
     return (
         <>
             <NavbarThree />
-            <PageBanner title="Our Investor" image="/images/investor-2.png" />
+            <PageBanner title={content?.banner_title || "Our Investor"} image={content?.banner_image || "/images/investor-2.png"} />
 
             {/* Intro */}
             <MaxWidthWrapper className="pt-24 pb-16">
@@ -99,28 +125,30 @@ export default function OurInvestor() {
                         transition={{ duration: 0.6 }}
                         className="flex flex-col justify-center lg:col-span-7"
                     >
-                        <h2>I Squared Capital</h2>
+                        <h2>{c.intro_heading || 'I Squared Capital'}</h2>
                         <p className="font-medium md:text-lg">
-                            Cube Grid Advisors is a portfolio company of I
-                            Squared Capital — the leading independent global
-                            infrastructure investor.
+                            {c.intro_lead || 'Cube Grid Advisors is a portfolio company of I Squared Capital — the leading independent global infrastructure investor.'}
                         </p>
-                        <p className="mb-0">
-                            I Squared Capital is a leading independent global
-                            infrastructure investment manager with{' '}
-                            <strong>$50 billion+</strong>
-                            in assets under management. Founded in 2012 by
-                            former senior executives at Morgan Stanley, I
-                            Squared builds and scales essential infrastructure
-                            businesses that deliver critical services to
-                            millions of people worldwide. With a portfolio of
-                            <strong>90+ companies</strong> operating across{' '}
-                            <strong>70+ countries</strong> and a team of{' '}
-                            <strong>300+ professionals</strong> across{' '}
-                            <strong>9 global offices</strong>, I Squared is
-                            known for developing mid-market companies into
-                            scaled infrastructure leaders.
-                        </p>
+                        {c.intro_body ? (
+                            <div className="rich-text mb-0" dangerouslySetInnerHTML={{ __html: c.intro_body }} />
+                        ) : (
+                            <p className="mb-0">
+                                I Squared Capital is a leading independent global
+                                infrastructure investment manager with{' '}
+                                <strong>$50 billion+</strong>
+                                in assets under management. Founded in 2012 by
+                                former senior executives at Morgan Stanley, I
+                                Squared builds and scales essential infrastructure
+                                businesses that deliver critical services to
+                                millions of people worldwide. With a portfolio of
+                                <strong>90+ companies</strong> operating across{' '}
+                                <strong>70+ countries</strong> and a team of{' '}
+                                <strong>300+ professionals</strong> across{' '}
+                                <strong>9 global offices</strong>, I Squared is
+                                known for developing mid-market companies into
+                                scaled infrastructure leaders.
+                            </p>
+                        )}
                     </motion.div>
 
                     <motion.div
@@ -138,7 +166,7 @@ export default function OurInvestor() {
                         <div className="h-full">
                                 <div className="investor-frame-2">
                                     <img
-                                        src="/images/client/isqaure-2.png"
+                                        src={c.intro_image || '/images/client/isqaure-2.png'}
                                         alt=""
                                         className="w-60"
                                     />
@@ -198,7 +226,7 @@ export default function OurInvestor() {
                         transition={{ duration: 0.5 }}
                         className="mx-auto mb-14 flex max-w-3xl flex-col items-center text-center"
                     >
-                        <h2>I Squared Capital&apos;s India Platforms</h2>
+                        <h2>{c.platforms_heading || "I Squared Capital's India Platforms"}</h2>
                         {/* <p className="md:text-lg">
                             A growing ecosystem of infrastructure leaders
                             powering roads, energy, gas, digital networks and

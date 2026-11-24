@@ -26,6 +26,8 @@ import {
     Zap,
 } from 'lucide-react';
 import { useRef, useState } from 'react';
+import axios from 'axios';
+import { toast } from 'sonner';
 
 const POWER_GRID_ROLES = [
     {
@@ -165,11 +167,77 @@ const CARD_THEMES = [
   { panel: 'bg-[#FFF5DA]', iconBg: 'bg-[#F5A800]' }, // amber (search button)
 ];
 
-export default function Career() {
+export default function Career({ content }: { content?: any }) {
+    const c = content ?? {};
+
+    const roles = (
+        Array.isArray(c.roles) && c.roles.length
+            ? c.roles.map((item: any, i: number) => ({
+                  id: String(i + 1),
+                  title: item?.title || '',
+                  department: item?.department || '',
+                  location: item?.location || '',
+                  type: item?.type || 'Full-Time',
+                  experience: item?.experience || '',
+                  summary: item?.summary || '',
+                  responsibilities: (item?.responsibilities ?? '')
+                      .split('\n')
+                      .map((x: string) => x.trim())
+                      .filter(Boolean),
+                  requirements: (item?.requirements ?? '')
+                      .split('\n')
+                      .map((x: string) => x.trim())
+                      .filter(Boolean),
+              }))
+            : POWER_GRID_ROLES
+    ).filter((role: any) => role.title);
+
     const [selectedRoleForModal, setSelectedRoleForModal] = useState(null);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [selectedRoleId, setSelectedRoleId] = useState('');
     const formRef = useRef(null);
+    const resumeInputRef = useRef<HTMLInputElement | null>(null);
+
+    const [form, setForm] = useState({
+        first_name: '',
+        last_name: '',
+        email: '',
+        phone: '',
+        role: '',
+        message: '',
+    });
+    const [resume, setResume] = useState<File | null>(null);
+    const [sending, setSending] = useState(false);
+
+    const set = (key: string) => (e: any) => setForm((f: any) => ({ ...f, [key]: e.target.value }));
+
+    const submitApplication = async (e: any) => {
+        e.preventDefault();
+        setSending(true);
+        try {
+            const payload = new FormData();
+            payload.append('type', 'career');
+            Object.entries(form).forEach(([k, v]) => payload.append(k, v));
+            if (resume) payload.append('resume', resume);
+            await axios.post('/form-submissions', payload, {
+                headers: { Accept: 'application/json' },
+            });
+            toast.success('Your application has been submitted. Our team will get back to you soon!');
+            setForm({ first_name: '', last_name: '', email: '', phone: '', role: '', message: '' } as any);
+            setResume(null);
+            setSelectedRoleId('');
+        } catch (err: any) {
+            const errors = err?.response?.data?.errors;
+            const first = errors ? Object.values(errors)[0] : null;
+            toast.error(
+                (Array.isArray(first) ? first[0] : null) ||
+                    err?.response?.data?.message ||
+                    'Something went wrong. Please try again.',
+            );
+        } finally {
+            setSending(false);
+        }
+    };
 
     const handleViewDetails = (role) => {
         setSelectedRoleForModal(role);
@@ -177,7 +245,7 @@ export default function Career() {
     };
 
     const handleApplyNow = (roleId) => {
-        setSelectedRoleId(roleId);
+        setSelectedRoleId(String(roleId));
         setIsDialogOpen(false);
         if (formRef.current) {
             formRef.current.scrollIntoView({ behavior: 'smooth' });
@@ -187,15 +255,19 @@ export default function Career() {
     return (
         <>
             <NavbarThree />
-            <PageBanner title="Careers" image="/images/career.jpg" />
+            <PageBanner title={content?.banner_title || "Careers"} image={content?.banner_image || "/images/career.jpg"} />
             <MaxWidthWrapper className="pt-24 md:pb-24">
                 <div className="mb-10 flex flex-col items-center text-center">
-                    <h2>We Are Hiring For</h2>
-                    <p className="max-w-3xl text-lg">
-                        Exceptional professionals who want to build India's
-                        energy infrastructure. 30+ years domain expertise
-                        preferred.
-                    </p>
+                    <h2>{c.hiring_heading || 'We Are Hiring For'}</h2>
+                    {c.hiring_intro ? (
+                        <div className="rich-text max-w-3xl text-lg" dangerouslySetInnerHTML={{ __html: c.hiring_intro }} />
+                    ) : (
+                        <p className="max-w-3xl text-lg">
+                            Exceptional professionals who want to build India's
+                            energy infrastructure. 30+ years domain expertise
+                            preferred.
+                        </p>
+                    )}
                 </div>
                 <div className="grid grid-cols-1 gap-4 lg:grid-cols-4">
                     {/* {POWER_GRID_ROLES.map((role, index) => (
@@ -251,7 +323,7 @@ export default function Career() {
                             </div>
                         </motion.div>
                     ))} */}
-                    {POWER_GRID_ROLES.map((role, index) => {
+                    {roles.map((role: any, index: number) => {
                         const theme = CARD_THEMES[index % CARD_THEMES.length];
 
                         return (
@@ -565,11 +637,15 @@ export default function Career() {
             >
                 <MaxWidthWrapper>
                     <div className="mb-12 flex flex-col items-center text-center">
-                        <h2>Submit Your Application</h2>
-                        <p className="max-w-3xl text-lg">
-                            Take the first step towards a rewarding career. Fill
-                            out the details below.
-                        </p>
+                        <h2>{c.apply_heading || 'Submit Your Application'}</h2>
+                        {c.apply_intro ? (
+                            <div className="rich-text max-w-3xl text-lg" dangerouslySetInnerHTML={{ __html: c.apply_intro }} />
+                        ) : (
+                            <p className="max-w-3xl text-lg">
+                                Take the first step towards a rewarding career. Fill
+                                out the details below.
+                            </p>
+                        )}
                     </div>
                     <div className="mx-auto max-w-4xl">
                         <motion.form
@@ -577,7 +653,7 @@ export default function Career() {
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true, margin: '-50px' }}
                             transition={{ duration: 0.6, delay: 0.2 }}
-                            onSubmit={(e) => e.preventDefault()}
+                            onSubmit={submitApplication}
                             className="space-y-6 rounded-2xl bg-white p-12 ring ring-accent-foreground"
                         >
                             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
@@ -588,6 +664,9 @@ export default function Career() {
                                     </label>
                                     <input
                                         type="text"
+                                        required
+                                        value={form.first_name}
+                                        onChange={set('first_name')}
                                         placeholder="Enter Your First Name"
                                         className="w-full rounded-sm bg-gray-100 px-4 py-3.5 text-black placeholder-gray-800 ring ring-gray-200 transition-shadow focus:ring-1 focus:ring-[#54a93c] focus:outline-none"
                                     />
@@ -600,6 +679,9 @@ export default function Career() {
                                     </label>
                                     <input
                                         type="text"
+                                        required
+                                        value={form.last_name}
+                                        onChange={set('last_name')}
                                         placeholder="Enter Your Last Name"
                                         className="w-full rounded-sm bg-gray-100 px-4 py-3.5 text-black placeholder-gray-800 ring ring-gray-200 transition-shadow focus:ring-1 focus:ring-[#54a93c] focus:outline-none"
                                     />
@@ -614,6 +696,9 @@ export default function Career() {
                                     </label>
                                     <input
                                         type="email"
+                                        required
+                                        value={form.email}
+                                        onChange={set('email')}
                                         placeholder="Enter Your Email"
                                         className="w-full rounded-sm bg-gray-100 px-4 py-3.5 text-black placeholder-gray-800 ring ring-gray-200 transition-shadow focus:ring-1 focus:ring-[#54a93c] focus:outline-none"
                                     />
@@ -626,6 +711,9 @@ export default function Career() {
                                     </label>
                                     <input
                                         type="tel"
+                                        required
+                                        value={form.phone}
+                                        onChange={set('phone')}
                                         placeholder="Enter Your Phone Number"
                                         className="w-full rounded-sm bg-gray-100 px-4 py-3.5 text-black placeholder-gray-800 ring ring-gray-200 transition-shadow focus:ring-1 focus:ring-[#54a93c] focus:outline-none"
                                     />
@@ -639,7 +727,12 @@ export default function Career() {
                                 </label>
                                 <div className="relative">
                                     <select
-                                        defaultValue=""
+                                        required
+                                        value={form.role || selectedRoleId}
+                                        onChange={(e) => {
+                                            setSelectedRoleId(e.target.value);
+                                            setForm((f) => ({ ...f, role: e.target.value }));
+                                        }}
                                         className="w-full cursor-pointer appearance-none rounded-sm bg-gray-100 px-4 py-3.5 pr-10 text-gray-800 placeholder-gray-800 ring ring-gray-200 transition-shadow focus:ring-1 focus:ring-[#54a93c] focus:outline-none"
                                     >
                                         <option
@@ -688,6 +781,8 @@ export default function Career() {
                                     </label>
                                     <textarea
                                         rows={6}
+                                        value={form.message}
+                                        onChange={set('message')}
                                         placeholder="Tell us briefly about your experience and why you want to join us..."
                                         className="w-full resize-y rounded-sm bg-gray-100 px-4 py-3.5 text-black placeholder-gray-800 ring ring-gray-200 transition-shadow focus:ring-1 focus:ring-[#54a93c] focus:outline-none"
                                     />
@@ -698,12 +793,22 @@ export default function Career() {
                                         <span className="text-red-500">*</span>
                                     </label>
 
-                                    <div className="flex w-full cursor-pointer flex-col items-center justify-center rounded-sm bg-primary/10 px-6 py-8.5 transition-all hover:bg-accent/30">
+                                    <input
+                                        ref={resumeInputRef}
+                                        type="file"
+                                        accept=".pdf,.doc,.docx"
+                                        className="hidden"
+                                        onChange={(e) => setResume(e.target.files?.[0] ?? null)}
+                                    />
+                                    <div
+                                        onClick={() => resumeInputRef.current?.click()}
+                                        className="flex w-full cursor-pointer flex-col items-center justify-center rounded-sm bg-primary/10 px-6 py-8.5 transition-all hover:bg-accent/30"
+                                    >
                                         <div className="mb-2 flex items-center justify-center text-slate-900">
                                             <CloudUpload className="h-10 w-10 stroke-[2.2]" />
                                         </div>
                                         <p className="mb-1 text-base font-semibold text-slate-900">
-                                            Click to upload or drag &amp; drop
+                                            {resume ? resume.name : 'Click to upload or drag & drop'}
                                         </p>
                                         <p className="text-xs text-slate-500">
                                             PDF, DOCX, or DOC (Max. 5MB)
