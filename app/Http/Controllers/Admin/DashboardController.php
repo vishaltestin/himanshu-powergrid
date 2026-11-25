@@ -3,45 +3,30 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Banner;
 use App\Models\Blog;
 use App\Models\Event;
 use App\Models\FormSubmission;
-use App\Models\Menu;
-use App\Models\PageContent;
+use App\Models\Page;
+use App\Models\PageSection;
 use App\Models\TeamMember;
-use Inertia\Response;
-use Inertia\Inertia;
+use Illuminate\View\View;
 
 class DashboardController extends Controller
 {
-    public function index(): Response
+    public function index(): View
     {
-        $newSubmissions = FormSubmission::where('status', 'new')->count();
-
-        return Inertia::render('admin/dashboard', [
+        return view('admin.dashboard', [
             'stats' => [
-                'newSubmissions' => $newSubmissions,
-                'totalSubmissions' => FormSubmission::count(),
-                'contactSubmissions' => FormSubmission::where('type', 'contact')->count(),
-                'enquirySubmissions' => FormSubmission::where('type', 'enquiry')->count(),
-                'careerSubmissions' => FormSubmission::where('type', 'career')->count(),
-                'publishedBlogs' => Blog::where('status', 1)->count(),
-                'publishedEvents' => Event::where('status', 1)->count(),
-                'activeBanners' => Banner::where('status', 1)->count(),
-                'teamMembers' => TeamMember::where('status', 1)->count(),
-                'menus' => Menu::where('status', 1)->count(),
-                'pages' => PageContent::count(),
+                ['label' => 'New submissions', 'value' => FormSubmission::where('status', 'new')->count(), 'icon' => 'inbox', 'route' => route('admin.submissions.index', ['status' => 'new']), 'tone' => 'amber'],
+                ['label' => 'Published pages', 'value' => Page::where('status', 'published')->count(), 'icon' => 'layers', 'route' => route('admin.pages.index'), 'tone' => 'brand'],
+                ['label' => 'Blog & news posts', 'value' => Blog::where('status', 1)->count(), 'icon' => 'newspaper', 'route' => route('admin.blogs.index'), 'tone' => 'emerald'],
+                ['label' => 'Active events', 'value' => Event::where('status', 1)->count(), 'icon' => 'calendar', 'route' => route('admin.events.index'), 'tone' => 'violet'],
+                ['label' => 'Team members', 'value' => TeamMember::where('status', 1)->count(), 'icon' => 'users', 'route' => route('admin.team-members.index'), 'tone' => 'sky'],
+                ['label' => 'Total sections', 'value' => PageSection::count(), 'icon' => 'layout-grid', 'route' => route('admin.pages.index'), 'tone' => 'slate'],
             ],
-            'recentSubmissions' => FormSubmission::latest()->take(8)->get()->map(fn ($s) => [
-                'id' => $s->id,
-                'type' => $s->type,
-                'name' => $s->name,
-                'email' => $s->email,
-                'phone' => $s->phone,
-                'status' => $s->status,
-                'created_at' => $s->created_at->format('d M Y, h:i A'),
-            ]),
+            'byType' => FormSubmission::selectRaw('type, count(*) as total')->groupBy('type')->pluck('total', 'type'),
+            'recentSubmissions' => FormSubmission::latest()->take(8)->get(),
+            'recentPages' => Page::latest('updated_at')->take(6)->get(),
         ]);
     }
 }

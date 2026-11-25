@@ -3,90 +3,104 @@
 namespace App\Http\Controllers\Frontend;
 
 use App\Http\Controllers\Controller;
+use App\Models\FormSubmission;
+use App\Models\PageSection;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 
+/**
+ * Handles every public form. Forms are built in the admin (form_section /
+ * contact_split blocks), so validation rules are derived from the section's
+ * own field definitions — any field the admin adds is accepted and stored.
+ */
 class FormSubmissionController extends Controller
 {
-    /**
-     * Store a public form submission (contact, enquiry, career, newsletter).
-     */
+    /** Field keys that map onto real submission columns. */
+    private const COLUMNS = ['name', 'email', 'phone', 'subject', 'message'];
+
     public function store(Request $request): JsonResponse
     {
-        $type = $request->input('type', 'contact');
+        $request->validate(['section_id' => ['required', 'integer']]);
 
-        $rules = match ($type) {
-            'career' => [
-                'type' => ['required', 'in:career'],
-                'first_name' => ['required', 'string', 'max:255'],
-                'last_name' => ['required', 'string', 'max:255'],
-                'email' => ['required', 'email', 'max:255'],
-                'phone' => ['required', 'string', 'max:30'],
-                'role' => ['required', 'string', 'max:255'],
-                'message' => ['nullable', 'string', 'max:5000'],
-                'resume' => ['nullable', 'file', 'mimes:pdf,doc,docx', 'max:5120'],
-            ],
-            'newsletter' => [
-                'type' => ['required', 'in:newsletter'],
-                'email' => ['required', 'email', 'max:255'],
-            ],
-            'enquiry', 'contact' => [
-                'type' => ['required', 'in:contact,enquiry'],
-                'name' => ['required', 'string', 'max:255'],
-                'email' => ['required', 'email', 'max:255'],
-                'phone' => ['nullable', 'string', 'max:30'],
-                'company' => ['nullable', 'string', 'max:255'],
-                'enquiry_type' => ['nullable', 'string', 'max:100'],
-                'state' => ['nullable', 'string', 'max:100'],
-                'city' => ['nullable', 'string', 'max:100'],
-                'message' => ['required', 'string', 'max:5000'],
-            ],
-            default => [
-                'type' => ['required', 'in:contact,enquiry,career,newsletter,other'],
-                'name' => ['nullable', 'string', 'max:255'],
-                'email' => ['nullable', 'email', 'max:255'],
-                'message' => ['nullable', 'string', 'max:5000'],
-            ],
-        };
+        $section = PageSection::query()
+            ->whereIn('type', ['form_section', 'contact_split'])
+            ->where('is_visible', true)
+            ->whereHas('page', fn ($q) => $q->where('status', 'published'))
+            ->findOrFail($request->integer('section_id'));
 
-        $validated = $request->validate($rules);
+        $fields = collect($section->data['fields'] ?? [])->filter(fn ($f) => !empty($f['name']))->values();
 
+        $rules = [];
+        $attributes = [];
+        foreach ($fields as $field) {
+            $key = $field['name'];
+            $required = !empty($field['required']) ? 'required' : 'nullable';
+            $attributes[$key] = $field['label'] ?: $key;
+
+            $rules[$key] = match ($field['type'] ?? 'text') {
+                'email' => [$required, 'email', 'max:255'],
+                'tel' => [$required, 'string', 'max:30'],
+                'number' => [$required, 'numeric'],
+                'textarea' => [$required, 'string', 'max:5000'],
+                'select' => array_filter([$required, 'string', 'max:255', !empty($field['options']) ? 'in:' . implode(',', array_map(fn ($o) => str_replace(',', '\,', $o), (array) $field['options'])) : null]),
+                'file' => [$required, 'file', 'mimes:pdf,doc,docx', 'max:5120'],
+                default => [$required, 'string', 'max:255'],
+            };
+        }
+
+        $validated = $request->validate($rules, [], $attributes);
+
+        $columns = [];
         $data = [];
-        foreach (['company', 'enquiry_type', 'state', 'city', 'role'] as $key) {
-            if ($request->filled($key)) {
-                $data[$key] = $request->input($key);
+
+        foreach ($fields as $field) {
+            $key = $field['name'];
+
+            if (($field['type'] ?? '') === 'file') {
+                if ($request->hasFile($key)) {
+                    $path = $request->file($key)->store('resumes', 'public');
+                    // Store a root-relative URL so links keep working whatever the domain is
+                    $data[$key] = '/storage/' . $path;
+                    $data[$key . '_name'] = $request->file($key)->getClientOriginalName();
+                }
+                continue;
+            }
+
+            $value = $validated[$key] ?? null;
+            if ($value === null || $value === '') {
+                continue;
+            }
+
+            if (in_array($key, self::COLUMNS, true)) {
+                $columns[$key] = $value;
+            } else {
+                $data[$field['label'] ?: $key] = $value;
             }
         }
 
-        // Career: persist the resume and keep its path in the payload
-        if ($type === 'career' && $request->hasFile('resume')) {
-            $path = $request->file('resume')->store('resumes', 'public');
-            $data['resume'] = Storage::disk('public')->url($path);
-            $data['resume_name'] = $request->file('resume')->getClientOriginalName();
+        // Friendly fallbacks: first/last name → name, role/service → subject
+        if (empty($columns['name'])) {
+            $full = trim(($validated['first_name'] ?? '') . ' ' . ($validated['last_name'] ?? ''));
+            $columns['name'] = $full ?: null;
+        }
+        if (empty($columns['subject'])) {
+            $columns['subject'] = $validated['role'] ?? $validated['enquiry_type'] ?? $validated['service'] ?? null;
         }
 
-        $name = $validated['name'] ?? trim(($validated['first_name'] ?? '') . ' ' . ($validated['last_name'] ?? ''));
+        $data['page'] = $section->page?->title;
 
-        \App\Models\FormSubmission::create([
-            'type' => $type,
-            'name' => $name ?: null,
-            'email' => $validated['email'] ?? null,
-            'phone' => $validated['phone'] ?? null,
-            'subject' => $validated['role'] ?? null,
-            'message' => $validated['message'] ?? null,
-            'data' => $data ?: null,
+        FormSubmission::create(array_merge($columns, [
+            'type' => $section->data['form_type'] ?? 'contact',
+            'data' => array_filter($data, fn ($v) => $v !== null && $v !== ''),
             'status' => 'new',
             'ip' => $request->ip(),
-            'user_agent' => Str::limit((string) $request->userAgent(), 500, ''),
-        ]);
+            'user_agent' => substr((string) $request->userAgent(), 0, 1000),
+        ]));
 
         return response()->json([
             'success' => true,
-            'message' => $type === 'career'
-                ? 'Your application has been submitted. Our team will get back to you soon!'
-                : 'Thanks for reaching out. Our team will get back to you soon!',
-        ], 201);
+            'message' => $section->data['success_message'] ?? 'Thank you! Your submission has been received.',
+        ]);
     }
 }

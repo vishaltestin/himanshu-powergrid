@@ -6,14 +6,16 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Inertia\Response;
-use Inertia\Inertia;
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
+use Illuminate\View\View;
 
 class AuthController extends Controller
 {
-    public function create(): Response
+    public function create(): View
     {
-        return Inertia::render('admin/login');
+        return view('admin.auth.login');
     }
 
     public function store(Request $request): RedirectResponse
@@ -23,28 +25,34 @@ class AuthController extends Controller
             'password' => ['required'],
         ]);
 
-        if (Auth::attempt(['email' => $credentials['email'], 'password' => $credentials['password'], 'status' => 1], $request->boolean('remember'))) {
+        $key = Str::lower($credentials['email']) . '|' . $request->ip();
+        if (RateLimiter::tooManyAttempts($key, 5)) {
+            throw ValidationException::withMessages([
+                'email' => 'Too many login attempts. Try again in ' . RateLimiter::availableIn($key) . ' seconds.',
+            ]);
+        }
+
+        if (Auth::attempt([...$credentials, 'status' => 1], $request->boolean('remember'))) {
             $user = Auth::user();
 
-            if ($user->hasRole('root') || $user->hasRole('admin')) {
+            if ($user->hasAnyRole(['root', 'admin'])) {
+                RateLimiter::clear($key);
                 $request->session()->regenerate();
                 $user->update(['last_login' => now()]);
 
-                return redirect()->intended(route('admin.dashboard.index'));
+                return redirect()->intended(route('admin.dashboard'));
             }
 
             Auth::logout();
             $request->session()->invalidate();
             $request->session()->regenerateToken();
 
-            return back()->withErrors([
-                'email' => 'Access Denied. You do not have administrative privileges.',
-            ]);
+            return back()->withErrors(['email' => 'Access denied. You do not have administrative privileges.'])->onlyInput('email');
         }
 
-        return back()->withErrors([
-            'email' => 'Invalid credentials or your account has been suspended.',
-        ])->onlyInput('email');
+        RateLimiter::hit($key, 60);
+
+        return back()->withErrors(['email' => 'Invalid credentials or your account has been suspended.'])->onlyInput('email');
     }
 
     public function destroy(Request $request): RedirectResponse
@@ -53,6 +61,6 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()->route('admin.login');
+        return redirect()->route('admin.login')->with('message', 'You have been signed out.');
     }
 }

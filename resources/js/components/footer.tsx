@@ -2,58 +2,31 @@ import React from 'react';
 import MaxWidthWrapper from './max-width-wrapper';
 import { Link, usePage } from '@inertiajs/react';
 
-const defaultCompanyLinks = [
-    { title: 'Home', href: '/' },
-    { title: 'About Company', href: '/about-us' },
-    { title: 'Projects', href: '/projects' },
-    { title: 'New & Updates', href: '/news' },
-    { title: 'Careers', href: '/career' },
-    { title: 'Contact Us', href: '/contact-us' },
-];
-
-const defaultResourceLinks = [
-    { title: 'Transmission Infrastructure', href: '/pillar/transmission-infrastructure' },
-    { title: 'EPC for Renewable Evacuation', href: '/pillar/epc-for-renewable-evacuation' },
-];
-
 const Footer = () => {
     const { props } = usePage<any>();
     const settings = props.settings ?? {};
 
     // Footer link groups (Quick Links / Pillers columns) come from settings
-    let linkGroups: { title: string; links: { title: string; href: string }[] }[] = [];
-    try {
-        const parsed = settings.footer_link_groups ? JSON.parse(settings.footer_link_groups) : null;
-        if (Array.isArray(parsed)) linkGroups = parsed;
-    } catch {
-        linkGroups = [];
-    }
+    const menus = props.menus ?? {};
+    type FooterLink = { title: string; href?: string | null };
+    const companyLinks: FooterLink[] = menus.footer_1 ?? [];
+    const resourceLinks: FooterLink[] = menus.footer_2 ?? [];
+    const legalLinks: FooterLink[] = menus.legal ?? [];
+    const quickLinksTitle: string = settings.footer_menu_1_title || '';
+    const resourceLinksTitle: string = settings.footer_menu_2_title || '';
+    const contactTitle: string = settings.footer_contact_title || '';
 
-    const social: { key: string; label: string; url: string }[] = (() => {
-        try {
-            const parsed = settings.social_links ? JSON.parse(settings.social_links) : null;
-            return Array.isArray(parsed) ? parsed : [];
-        } catch {
-            return [];
-        }
-    })();
-
-    const socialUrl = (key: string, fallbackIndex: number) =>
-        (social.find((x) => x.key === key)?.url) || social[fallbackIndex]?.url || '#';
-
-    const companyLinks = linkGroups[0]?.links?.length ? linkGroups[0].links : defaultCompanyLinks;
-    const resourceLinks = linkGroups[1]?.links?.length ? linkGroups[1].links : defaultResourceLinks;
-    const quickLinksTitle = linkGroups[0]?.title || 'Quick Links';
-    const resourceLinksTitle = linkGroups[1]?.title || 'Pillers';
+    const social: { key: string; label?: string; url?: string }[] = Array.isArray(settings.social_links) ? settings.social_links : [];
+    const socialUrl = (key: string) => social.find((x) => x.key === key && x.url)?.url || '';
+    const socialLabel = (key: string) => social.find((x) => x.key === key)?.label || key;
 
     const logoWhite: string = settings.logo_white || '/images/logo-new-white.png';
-    const footerDescription: string = settings.footer_description ||
-        'A portfolio company of I Squared Capital, building complex energy infrastructure for India’s clean energy future. We develop, construct, operate, and scale critical assets across India’s power value chain.';
-    const contactAddress: string = settings.contact_address ||
-        '7th Floor, Block B, Vatika Business Park Sohna Road, Badshahpur, Sector-49 Gurugram, Haryana - 122018';
-    const contactPhone: string = settings.contact_phone || '+91 123 4567 890';
+    const footerDescription: string = settings.footer_description || '';
+    const contactAddress: string = settings.contact_address || '';
+    const contactPhone: string = settings.contact_phone || '';
     const contactPhoneHref = 'tel:' + contactPhone.replace(/[^+\d]/g, '');
-    const contactEmail: string = settings.contact_email || 'admin@cubegrid.in';
+    const contactEmail: string = settings.contact_email || '';
+
     return (
         <footer className="relative bg-primary-foreground pt-8 pb-4 text-white md:pt-16">
             <MaxWidthWrapper className="relative z-10">
@@ -70,8 +43,11 @@ const Footer = () => {
                             {footerDescription}
                         </p>
                         <div className="flex gap-4">
-                            <a
-                                href={socialUrl('facebook', 0)}
+                            {socialUrl('facebook') && (<a
+                                href={socialUrl('facebook')}
+                                aria-label={socialLabel('facebook')}
+                                target="_blank"
+                                rel="noopener noreferrer"
                                 className="group flex h-10 w-10 items-center justify-center rounded-full bg-white/5 transition-all duration-300 hover:-translate-y-1 hover:bg-[#1877F2] hover:shadow-lg hover:shadow-[#1877F2]/30"
                             >
                                 <svg
@@ -81,9 +57,12 @@ const Footer = () => {
                                 >
                                     <path d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z" />
                                 </svg>
-                            </a>
-                            <a
-                                href={socialUrl('twitter', 1)}
+                            </a>)}
+                            {socialUrl('twitter') && (<a
+                                href={socialUrl('twitter')}
+                                aria-label={socialLabel('twitter')}
+                                target="_blank"
+                                rel="noopener noreferrer"
                                 className="group flex h-10 w-10 items-center justify-center rounded-full bg-white/5 transition-all duration-300 hover:-translate-y-1 hover:bg-black hover:shadow-lg"
                             >
                                 <svg
@@ -93,9 +72,12 @@ const Footer = () => {
                                 >
                                     <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.007 4.15H5.059z" />
                                 </svg>
-                            </a>
-                            <a
-                                href={socialUrl('linkedin', 2)}
+                            </a>)}
+                            {socialUrl('linkedin') && (<a
+                                href={socialUrl('linkedin')}
+                                aria-label={socialLabel('linkedin')}
+                                target="_blank"
+                                rel="noopener noreferrer"
                                 className="group flex h-10 w-10 items-center justify-center rounded-full bg-white/5 transition-all duration-300 hover:-translate-y-1 hover:bg-[#0A66C2] hover:shadow-lg hover:shadow-[#0A66C2]/30"
                             >
                                 <svg
@@ -105,9 +87,12 @@ const Footer = () => {
                                 >
                                     <path d="M4.98 3.5c0 1.381-1.11 2.5-2.48 2.5s-2.48-1.119-2.48-2.5c0-1.38 1.11-2.5 2.48-2.5s2.48 1.12 2.48 2.5zm.02 4.5h-5v16h5v-16zm7.982 0h-4.968v16h4.969v-8.399c0-4.67 6.029-5.052 6.029 0v8.399h4.988v-10.131c0-7.88-8.922-7.593-11.018-3.714v-2.155z" />
                                 </svg>
-                            </a>
-                            <a
-                                href={socialUrl('youtube', 3)}
+                            </a>)}
+                            {socialUrl('youtube') && (<a
+                                href={socialUrl('youtube')}
+                                aria-label={socialLabel('youtube')}
+                                target="_blank"
+                                rel="noopener noreferrer"
                                 className="group flex h-10 w-10 items-center justify-center rounded-full bg-white/5 transition-all duration-300 hover:-translate-y-1 hover:bg-[#FF0000] hover:shadow-lg hover:shadow-[#FF0000]/30"
                             >
                                 <svg
@@ -117,12 +102,10 @@ const Footer = () => {
                                 >
                                     <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
                                 </svg>
-                            </a>
+                            </a>)}
                         </div>
                         <div className="mt-12 hidden md:block lg:hidden">
-                            <h4 className="mb-4 font-heading text-2xl text-white md:mb-6">
-                                Contact Us
-                            </h4>
+                            <h4 className="mb-4 font-heading text-2xl text-white md:mb-6">{contactTitle}</h4>
                             <ul className="space-y-3 text-sm text-white/90">
                                 <li className="group flex items-start gap-4">
                                     <div className="mt-0.5 rounded-full bg-white p-2 transition-colors">
@@ -206,9 +189,9 @@ const Footer = () => {
                             </h4>
                             <ul className="space-y-2">
                                 {companyLinks.map((item) => (
-                                    <li key={item.title}>
+                                    <li key={item.title + item.href}>
                                         <Link
-                                            href={item.href}
+                                            href={item.href || '#'}
                                             className="text-sm text-white/90 transition-all duration-300 hover:pl-1 hover:text-white"
                                         >
                                             {item.title}
@@ -224,9 +207,9 @@ const Footer = () => {
                             </h4>
                             <ul className="space-y-2">
                                 {resourceLinks.map((item) => (
-                                    <li key={item.title}>
+                                    <li key={item.title + item.href}>
                                         <Link
-                                            href={item.href}
+                                            href={item.href || '#'}
                                             className="text-sm text-white/90 transition-all duration-300 hover:pl-1 hover:text-white"
                                         >
                                             {item.title}
@@ -237,9 +220,7 @@ const Footer = () => {
                         </div>
 
                         <div className="block md:hidden lg:block">
-                            <h4 className="mb-4 font-heading text-2xl text-white md:mb-6">
-                                Contact Us
-                            </h4>
+                            <h4 className="mb-4 font-heading text-2xl text-white md:mb-6">{contactTitle}</h4>
                             <ul className="space-y-3 text-sm text-white/90">
                                 <li className="group flex items-start gap-4">
                                     <div className="mt-0.5 rounded-full bg-white p-2 transition-colors">
@@ -319,33 +300,20 @@ const Footer = () => {
                 </div>
 
                 <div className="footer-top-border flex flex-col items-center justify-between gap-4 pt-4 text-sm text-white/90 md:flex-row">
-                    <p className="mb-0 text-sm">
-                        © {new Date().getFullYear()} CubeGrid. All rights
-                        reserved.
-                    </p>
+                    <p className="mb-0 text-sm">{settings.footer_copyright}</p>
                     <div className="flex justify-evenly md:flex-row md:gap-6">
-                        <Link
-                            href="/privacy-policy"
-                            className="transition-colors hover:text-white"
-                        >
-                            Privacy Policy
-                        </Link>
-                        <Link
-                            href="/terms-service"
-                            className="transition-colors hover:text-white"
-                        >
-                            Terms of Service
-                        </Link>
-                        <span className="hidden md:inline">|</span>
-                        <a
-                            href="#"
-                            className="hidden transition-colors hover:text-white md:block"
-                        >
-                            Design and Developed by:{' '}
-                            <span className="font-medium text-white/90">
-                                DigitalFueled
-                            </span>
-                        </a>
+                        {legalLinks.map((item) => (
+                            <Link key={item.title + item.href} href={item.href || '#'} className="transition-colors hover:text-white">
+                                {item.title}
+                            </Link>
+                        ))}
+                        {settings.footer_credit_name && legalLinks.length > 0 && <span className="hidden md:inline">|</span>}
+                        {settings.footer_credit_name && (
+                            <a href={settings.footer_credit_url || '#'} className="hidden transition-colors hover:text-white md:block" target="_blank" rel="noopener noreferrer">
+                                {settings.footer_credit_prefix}{' '}
+                                <span className="font-medium text-white/90">{settings.footer_credit_name}</span>
+                            </a>
+                        )}
                     </div>
                 </div>
             </MaxWidthWrapper>

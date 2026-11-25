@@ -1,0 +1,38 @@
+[
+ {
+  "icon": "/images/client/cube-highway.png",
+  "name": "Cube Highways",
+  "tag": "Roads",
+  "description": "India's largest toll roads platform. 28 road projects. Listed as InvIT on BSE, raising ~$630 million. Backed by ADIA, IFC, and Japanese investors."
+ },
+ {
+  "icon": "/images/client/hexa.png",
+  "name": "HEXA Renewables",
+  "tag": "Renewables",
+  "description": "Pan-Asian renewable energy platform. Utility-scale solar, wind, and battery storage across Japan, Taiwan, Malaysia, Southeast Asia, and the Middle East."
+ },
+ {
+  "icon": "/images/client/agp.png",
+  "name": "AG&P / THINK Gas",
+  "tag": "Gas",
+  "description": "Natural gas distribution platform serving 80 million+ customers in India. City gas distribution network across multiple states."
+ },
+ {
+  "icon": "/images/client/lightstorm.webp",
+  "name": "Lightstorm",
+  "tag": "Digital",
+  "description": "Digital network infrastructure platform. 30,000+ km carrier-neutral fiber network across India, 700 Tbps capacity, 100+ enterprise customers, and Pacific subsea cable assets."
+ },
+ {
+  "icon": "/images/client/polaris.svg",
+  "name": "Polaris Smart Metering",
+  "tag": "Smart Meters",
+  "description": "India's leading smart meter solutions provider. Deploying 10M+ smart meters with ₹7,700 crore+ order book. Manufacturing via Polaris Nova facility."
+ },
+ {
+  "icon": "/images/logo-new-transparent.png",
+  "name": "Cube Grid",
+  "tag": "Newest Addition",
+  "description": "India's next-generation energy infrastructure platform — transmission, pumped hydro, distribution, nuclear, and green hydrogen. The newest addition to ISQ's India portfolio."
+ }
+]

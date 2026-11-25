@@ -19,7 +19,7 @@ function PageBanner({
                 className="absolute inset-0 object-center w-full h-full object-cover"
             />
             <MaxWidthWrapper className="relative z-2 flex flex-col items-start justify-end text-white">
-                <h2 className="mb-0 lg:mb-4 text-4xl font-heading font-medium lg:text-7xl drop-shadow-lg">{title}</h2>
+                <h1 className="mb-0 lg:mb-4 text-4xl font-heading font-medium lg:text-7xl drop-shadow-lg">{title}</h1>
                 {subtitle && <p className="max-w-3xl drop-shadow-lg text-xl">{subtitle}</p>}
             </MaxWidthWrapper>
         </div>

@@ -1,0 +1,42 @@
+[
+ {
+  "id": 1,
+  "title": "Coming Soon",
+  "category": "Quality Assurance",
+  "description": "Certified for design, construction, and commissioning of high-voltage transmission systems.",
+  "image": "/images/certificate.jpg",
+  "pdfUrl": "#",
+  "fileSize": "1.8 MB",
+  "issuedYear": "2024"
+ },
+ {
+  "id": 2,
+  "title": "Coming Soon",
+  "category": "Environmental",
+  "description": "Validation of environmental protection standards and green grid corridor sustainability.",
+  "image": "/images/certificate.jpg",
+  "pdfUrl": "#",
+  "fileSize": "2.1 MB",
+  "issuedYear": "2024"
+ },
+ {
+  "id": 3,
+  "title": "Coming Soon",
+  "category": "Occupational Safety",
+  "description": "Zero-harm policy compliance across live-line operations and high-altitude tower erection.",
+  "image": "/images/certificate.jpg",
+  "pdfUrl": "#",
+  "fileSize": "1.5 MB",
+  "issuedYear": "2023"
+ },
+ {
+  "id": 4,
+  "title": "Coming Soon",
+  "category": "Grid Compliance",
+  "description": "Statutory grid clearance for bulk transmission infrastructure and substation integration.",
+  "image": "/images/certificate.jpg",
+  "pdfUrl": "#",
+  "fileSize": "3.4 MB",
+  "issuedYear": "2023"
+ }
+]

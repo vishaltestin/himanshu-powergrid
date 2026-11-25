@@ -34,6 +34,19 @@ class AppServiceProvider extends ServiceProvider
         });
 
         Paginator::useTailwind();
+
+        $this->app->singleton(\App\PageBuilder\BlockRegistry::class);
+
+        // Shared data for the Blade admin layout
+        \Illuminate\Support\Facades\View::composer(['admin.layouts.app', 'admin.auth.login'], function ($view) {
+            $settings = \App\Models\Setting::allMap();
+            $view->with([
+                'siteName' => $settings['site_name'] ?? config('app.name'),
+                'siteLogo' => $settings['logo'] ?? '/images/logo-new.png',
+                'siteLogoWhite' => $settings['logo_white'] ?? '/images/logo-new-white.png',
+                'newSubmissionCount' => auth()->check() ? \App\Models\FormSubmission::where('status', 'new')->count() : 0,
+            ]);
+        });
     }
 
     /**

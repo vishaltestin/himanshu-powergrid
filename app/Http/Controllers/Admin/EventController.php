@@ -4,40 +4,38 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Event;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
-use Inertia\Response;
+use Illuminate\View\View;
 
 class EventController extends Controller
 {
-    public function index(): Response
+    public function index(): View
     {
-        return Inertia::render('admin/events/index', [
-            'events' => Event::orderBy('order')->get(),
-        ]);
+        return view('admin.events.index', ['events' => Event::orderBy('order')->orderByDesc('id')->get()]);
     }
 
-    public function create(): Response
+    public function create(): View
     {
-        return Inertia::render('admin/events/edit', ['event' => null]);
+        return $this->form(new Event(['status' => true, 'order' => (Event::max('order') ?? 0) + 1]));
     }
 
     public function store(Request $request): RedirectResponse
     {
-        Event::create($this->validate($request));
+        Event::create($this->validated($request));
 
         return redirect()->route('admin.events.index')->with('message', 'Event created.');
     }
 
-    public function edit(Event $event): Response
+    public function edit(Event $event): View
     {
-        return Inertia::render('admin/events/edit', ['event' => $event]);
+        return $this->form($event);
     }
 
     public function update(Request $request, Event $event): RedirectResponse
     {
-        $event->update($this->validate($request));
+        $event->update($this->validated($request));
 
         return redirect()->route('admin.events.index')->with('message', 'Event updated.');
     }
@@ -46,7 +44,7 @@ class EventController extends Controller
     {
         $event->delete();
 
-        return redirect()->route('admin.events.index')->with('message', 'Event deleted.');
+        return back()->with('message', 'Event deleted.');
     }
 
     public function toggleStatus(Event $event): RedirectResponse
@@ -56,9 +54,45 @@ class EventController extends Controller
         return back()->with('message', 'Status updated.');
     }
 
-    private function validate(Request $request): array
+    public function reorder(Request $request): JsonResponse
     {
-        return $request->validate([
+        foreach ($request->validate(['ids' => ['required', 'array']])['ids'] as $i => $id) {
+            Event::whereKey($id)->update(['order' => $i + 1]);
+        }
+
+        return response()->json(['ok' => true]);
+    }
+
+    private function form(Event $event): View
+    {
+        return view('admin.crud.form', [
+            'title' => $event->exists ? 'Edit event' : 'New event',
+            'back' => route('admin.events.index'),
+            'backLabel' => 'Events',
+            'action' => $event->exists ? route('admin.events.update', $event) : route('admin.events.store'),
+            'method' => $event->exists ? 'PUT' : 'POST',
+            'values' => $event->toArray(),
+            'fields' => [
+                ['name' => 'title', 'label' => 'Title', 'type' => 'text', 'required' => true],
+                ['name' => 'description', 'label' => 'Description', 'type' => 'textarea', 'rows' => 4],
+                ['name' => 'date', 'label' => 'Date (as displayed)', 'type' => 'text', 'width' => 'half', 'placeholder' => 'November 15, 2026'],
+                ['name' => 'time', 'label' => 'Time (as displayed)', 'type' => 'text', 'width' => 'half', 'placeholder' => '9:00 AM - 5:00 PM'],
+                ['name' => 'location', 'label' => 'Location', 'type' => 'text', 'width' => 'half'],
+                ['name' => 'category', 'label' => 'Category', 'type' => 'text', 'width' => 'half'],
+                ['name' => 'price', 'label' => 'Price', 'type' => 'text', 'width' => 'half', 'placeholder' => 'Free'],
+                ['name' => 'badge', 'label' => 'Badge', 'type' => 'text', 'width' => 'half', 'placeholder' => 'Upcoming'],
+            ],
+            'sidebar' => [
+                ['name' => 'status', 'label' => 'Published', 'type' => 'toggle'],
+                ['name' => 'image', 'label' => 'Image', 'type' => 'image'],
+                ['name' => 'order', 'label' => 'Sort order', 'type' => 'number'],
+            ],
+        ]);
+    }
+
+    private function validated(Request $request): array
+    {
+        $data = $request->validate([
             'title' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:3000'],
             'date' => ['nullable', 'string', 'max:100'],
@@ -68,8 +102,11 @@ class EventController extends Controller
             'image' => ['nullable', 'string', 'max:1000'],
             'price' => ['nullable', 'string', 'max:50'],
             'badge' => ['nullable', 'string', 'max:50'],
-            'order' => ['required', 'integer', 'min:0'],
-            'status' => ['required', 'boolean'],
+            'order' => ['nullable', 'integer', 'min:0'],
         ]);
+        $data['order'] = (int) ($data['order'] ?? 0);
+        $data['status'] = $request->boolean('status');
+
+        return $data;
     }
 }

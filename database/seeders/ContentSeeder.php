@@ -2,11 +2,9 @@
 
 namespace Database\Seeders;
 
-use App\Models\Banner;
 use App\Models\Blog;
 use App\Models\Event;
 use App\Models\Menu;
-use App\Models\PageContent;
 use App\Models\Setting;
 use App\Models\TeamMember;
 use Illuminate\Database\Seeder;
@@ -16,130 +14,66 @@ class ContentSeeder extends Seeder
     public function run(): void
     {
         $this->seedSettings();
-        $this->seedBanners();
         $this->seedMenus();
         $this->seedTeam();
         $this->seedEvents();
         $this->seedBlogs();
     }
 
+    /**
+     * Site-wide settings (keys from config/site-settings.php). Existing values
+     * are never overwritten, so re-running the seeder keeps admin edits.
+     */
     private function seedSettings(): void
     {
-        $settings = [
-            ['key' => 'site_name', 'value' => 'CubeGrid Advisors', 'group' => 'general', 'type' => 'text'],
-            ['key' => 'logo', 'value' => '/images/logo-new.png', 'group' => 'general', 'type' => 'image'],
-            ['key' => 'logo_white', 'value' => '/images/logo-new-white.png', 'group' => 'general', 'type' => 'image'],
-            ['key' => 'contact_email', 'value' => 'admin@cubegrid.in', 'group' => 'contact', 'type' => 'text'],
-            ['key' => 'contact_phone', 'value' => '+91 123 4567 890', 'group' => 'contact', 'type' => 'text'],
-            ['key' => 'contact_address', 'value' => '7th Floor, Block B, Vatika Business Park Sohna Road, Badshahpur, Sector-49 Gurugram, Haryana - 122018', 'group' => 'contact', 'type' => 'textarea'],
-            ['key' => 'footer_description', 'value' => 'A portfolio company of I Squared Capital, building complex energy infrastructure for India’s clean energy future. We develop, construct, operate, and scale critical assets across India’s power value chain.', 'group' => 'footer', 'type' => 'textarea'],
-            ['key' => 'footer_link_groups', 'value' => json_encode([
-                [
-                    'title' => 'Quick Links',
-                    'links' => [
-                        ['title' => 'Home', 'href' => '/'],
-                        ['title' => 'About Company', 'href' => '/about-us'],
-                        ['title' => 'Projects', 'href' => '/projects'],
-                        ['title' => 'New & Updates', 'href' => '/news'],
-                        ['title' => 'Careers', 'href' => '/career'],
-                        ['title' => 'Contact Us', 'href' => '/contact-us'],
-                    ],
-                ],
-                [
-                    'title' => 'Resources',
-                    'links' => [
-                        ['title' => 'Transmission Infrastructure', 'href' => '/pillar/transmission-infrastructure'],
-                        ['title' => 'EPC for Renewable Evacuation', 'href' => '/pillar/epc-for-renewable-evacuation'],
-                    ],
-                ],
-            ]), 'group' => 'footer', 'type' => 'json'],
-            ['key' => 'social_links', 'value' => json_encode([
+        $values = [
+            'site_name' => 'CubeGrid Advisors',
+            'logo' => '/images/logo-new.png',
+            'logo_white' => '/images/logo-new-white.png',
+            'default_meta_description' => 'Cube Grid Advisors — an I Squared Capital portfolio company building complex energy infrastructure for India’s clean energy future.',
+            'contact_email' => 'admin@cubegrid.in',
+            'contact_phone' => '+91 123 4567 890',
+            'contact_address' => '7th Floor, Block B, Vatika Business Park Sohna Road, Badshahpur, Sector-49 Gurugram, Haryana - 122018',
+            'map_embed_url' => self::MAP_URL,
+            'footer_description' => 'A portfolio company of I Squared Capital, building complex energy infrastructure for India’s clean energy future. We develop, construct, operate, and scale critical assets across India’s power value chain.',
+            'footer_menu_1_title' => 'Quick Links',
+            'footer_menu_2_title' => 'Pillers',
+            'footer_contact_title' => 'Contact Us',
+            'social_links' => [
                 ['key' => 'facebook', 'label' => 'Facebook', 'url' => '#'],
                 ['key' => 'twitter', 'label' => 'X / Twitter', 'url' => '#'],
                 ['key' => 'linkedin', 'label' => 'LinkedIn', 'url' => '#'],
                 ['key' => 'youtube', 'label' => 'YouTube', 'url' => '#'],
-            ]), 'group' => 'social', 'type' => 'json'],
-            ['key' => 'investor_section', 'value' => json_encode([
-                'label' => 'Our Investor',
-                'title' => 'I Squared Capital',
-                'subtitle' => 'Cube Grid Advisors is a portfolio company of I Squared Capital.',
-                'description' => 'I Squared Capital is a leading global infrastructure investment manager with $50 billion+ in assets under management. Founded in 2012, I Squared builds and scales essential infrastructure businesses across global markets.',
-                'image' => '/images/client/isqaure-2.png',
-                'stats' => [
-                    ['value' => '$60B+', 'label' => 'Assets under management'],
-                    ['value' => '115+', 'label' => 'Countries with investment'],
-                    ['value' => '100+', 'label' => 'Portfolio companies globally'],
-                    ['value' => '360+', 'label' => 'Infrastructure professionals'],
-                ],
-            ]), 'group' => 'home', 'type' => 'json'],
-        ];
-
-        foreach ($settings as $setting) {
-            Setting::updateOrCreate(['key' => $setting['key']], $setting);
-        }
-    }
-
-    private function seedBanners(): void
-    {
-        $banners = [
-            [
-                'title' => 'Building a Brighter Tomorrow',
-                'highlight' => 'Brighter',
-                'highlight_class' => 'text-accent-foreground',
-                'description' => 'Building the critical energy infrastructure that India needs — from high-voltage HVDC transmission lines to pumped hydro storage, from nuclear power to green hydrogen.',
-                'image' => '/images/banner-2.png',
-                'button_text' => 'Explore',
-                'button_link' => '/projects',
-                'order' => 1,
-                'status' => 1,
-            ],
-            [
-                'title' => "Powering India's Green Transition",
-                'highlight' => 'Green',
-                'highlight_class' => 'text-accent',
-                'description' => 'Building the critical energy infrastructure that India needs — from high-voltage HVDC transmission lines to pumped hydro storage, from nuclear power to green hydrogen.',
-                'image' => 'https://images.pexels.com/photos/17921806/pexels-photo-17921806.jpeg',
-                'button_text' => 'Partner With Us',
-                'button_link' => '/enquiry',
-                'order' => 2,
-                'status' => 1,
-            ],
-            [
-                'title' => 'Innovating Sustainable Energy',
-                'highlight' => 'Sustainable',
-                'highlight_class' => 'text-primary',
-                'description' => 'Building the critical energy infrastructure that India needs — from high-voltage HVDC transmission lines to pumped hydro storage, from nuclear power to green hydrogen.',
-                'image' => 'https://images.pexels.com/photos/35973875/pexels-photo-35973875.jpeg',
-                'button_text' => 'Contact Us',
-                'button_link' => '/contact-us',
-                'order' => 3,
-                'status' => 1,
-            ],
-            [
-                'title' => "Driving India's Energy Future",
-                'highlight' => 'Energy',
-                'highlight_class' => 'text-accent',
-                'description' => "Accelerating India's journey towards energy independence through advanced infrastructure, innovative technologies, and sustainable power solutions for generations to come.",
-                'image' => '/images/india-map.png',
-                'button_text' => 'Discover More',
-                'button_link' => '/about-us',
-                'order' => 4,
-                'status' => 1,
             ],
         ];
 
-        foreach ($banners as $banner) {
-            Banner::updateOrCreate(['title' => $banner['title'], 'image' => $banner['image']], $banner);
+        $groups = [];
+        foreach (config('site-settings') as $group => $def) {
+            foreach ($def['fields'] as $field) {
+                if (isset($field['name'])) {
+                    $groups[$field['name']] = [$group, $field['type'] ?? 'text'];
+                }
+            }
         }
+
+        foreach ($values as $key => $value) {
+            [$group, $type] = $groups[$key] ?? ['general', 'text'];
+            Setting::firstOrCreate(['key' => $key], [
+                'value' => is_array($value) ? json_encode($value) : $value,
+                'group' => $group,
+                'type' => $type,
+            ]);
+        }
+
+        // Settings from the old admin that no longer exist
+        Setting::whereIn('key', ['footer_link_groups', 'investor_section'])->delete();
     }
+
+    public const MAP_URL = 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d14037.40082522765!2d77.03228574131249!3d28.408687865633972!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390d229abb17b84f%3A0x90e8afb86373f00a!2s7th%20Floor%2C%20TOWER-B%2C%20Spaze%20I-Tech%20Park%2C%20Sohna%20-%20Gurgaon%20Rd%2C%20Block%20S%2C%20Sector%2049%2C%20Gurugram%2C%20Haryana%20122018!5e0!3m2!1sen!2sin!4v1791025140979!5m2!1sen!2sin';
 
     private function seedMenus(): void
     {
-        if (Menu::where('menu_position', 'main')->exists()) {
-            return; // keep manual edits
-        }
-
-        $menus = [
+        $this->seedMenuPosition('main', [
             ['title' => 'Home', 'alias' => '/', 'order' => 1, 'children' => []],
             ['title' => 'About Us', 'alias' => '/about-us', 'order' => 2, 'children' => [
                 ['title' => 'Overview', 'alias' => '/about-us', 'order' => 1],
@@ -163,21 +97,48 @@ class ContentSeeder extends Seeder
                 ['title' => 'Reach Us', 'alias' => '/contact-us', 'order' => 1],
                 ['title' => 'Enquiry', 'alias' => '/enquiry', 'order' => 2],
             ]],
-        ];
+        ]);
 
-        foreach ($menus as $menu) {
-            $children = $menu['children'];
-            unset($menu['children']);
+        $this->seedMenuPosition('footer_1', [
+            ['title' => 'Home', 'alias' => '/'],
+            ['title' => 'About Company', 'alias' => '/about-us'],
+            ['title' => 'Projects', 'alias' => '/projects'],
+            ['title' => 'New & Updates', 'alias' => '/news'],
+            ['title' => 'Careers', 'alias' => '/career'],
+            ['title' => 'Contact Us', 'alias' => '/contact-us'],
+        ]);
 
-            $parent = Menu::create(array_merge($menu, [
-                'menu_position' => 'main',
+        $this->seedMenuPosition('footer_2', [
+            ['title' => 'Transmission Infrastructure', 'alias' => '/pillar/transmission-infrastructure'],
+            ['title' => 'EPC for Renewable Evacuation', 'alias' => '/pillar/epc-for-renewable-evacuation'],
+        ]);
+
+        $this->seedMenuPosition('legal', [
+            ['title' => 'Privacy Policy', 'alias' => '/privacy-policy'],
+            ['title' => 'Terms of Service', 'alias' => '/terms-service'],
+        ]);
+    }
+
+    /** Creates a menu tree for one position, unless that position already has items. */
+    private function seedMenuPosition(string $position, array $items): void
+    {
+        if (Menu::where('menu_position', $position)->exists()) {
+            return; // keep manual edits
+        }
+
+        foreach (array_values($items) as $i => $item) {
+            $children = $item['children'] ?? [];
+            unset($item['children']);
+
+            $parent = Menu::create(array_merge(['order' => $i + 1], $item, [
+                'menu_position' => $position,
                 'parent_id' => null,
                 'status' => 1,
             ]));
 
-            foreach ($children as $child) {
-                Menu::create(array_merge($child, [
-                    'menu_position' => 'main',
+            foreach (array_values($children) as $j => $child) {
+                Menu::create(array_merge(['order' => $j + 1], $child, [
+                    'menu_position' => $position,
                     'parent_id' => $parent->id,
                     'status' => 1,
                 ]));
@@ -225,13 +186,6 @@ class ContentSeeder extends Seeder
         foreach ($board as $member) {
             TeamMember::create(array_merge($member, ['group' => 'board', 'status' => 1]));
         }
-
-        // Teams page intro + quote (page content)
-        PageContent::updateOrCreate(['page' => 'teams'], ['content' => [
-            'banner' => ['title' => 'Management Team', 'image' => '/images/team-2.png'],
-            'intro' => 'Our leadership team is expanding rapidly. Each CXO being onboarded brings 30+ years of hands-on experience in developing, constructing, and operating infrastructure assets at scale — with 150+ years of combined experience across transmission, storage, distribution, nuclear, and hydrogen.',
-            'quote' => '"Building the team that builds India\'s grid".',
-        ]]);
     }
 
     private function seedEvents(): void
@@ -253,10 +207,6 @@ class ContentSeeder extends Seeder
             'order' => 1,
             'status' => 1,
         ]);
-
-        PageContent::updateOrCreate(['page' => 'events'], ['content' => [
-            'banner' => ['title' => 'Events', 'image' => '/images/events.png'],
-        ]]);
     }
 
     private function seedBlogs(): void
@@ -316,12 +266,5 @@ class ContentSeeder extends Seeder
             Blog::create($post);
         }
 
-        PageContent::updateOrCreate(['page' => 'blogs'], ['content' => [
-            'banner' => ['title' => 'Our Blogs', 'image' => '/images/news.jpg'],
-        ]]);
-
-        PageContent::updateOrCreate(['page' => 'news'], ['content' => [
-            'banner' => ['title' => 'News & Updates', 'image' => '/images/news.jpg'],
-        ]]);
     }
 }

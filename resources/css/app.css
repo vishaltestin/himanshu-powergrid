@@ -9,7 +9,7 @@
 @custom-variant dark (&:is(.dark *));
 @custom-variant hover (&:hover);
 
-@source '../views';
+@source '../views/app.blade.php';
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 
 @theme {
@@ -408,10 +408,6 @@
 }
 
 
-/* Home two Styling Start */
-
-
-/* Home two Styling End   */
 /* Rich text output rendered from the admin editor */
 .rich-text p { margin-bottom: 0.75rem; }
 .rich-text p:last-child { margin-bottom: 0; }
@@ -423,22 +419,5 @@
 .rich-text li { margin-bottom: 0.3rem; }
 .rich-text a { color: #2563eb; text-decoration: underline; }
 .rich-text strong { font-weight: 600; }
-
-/* Quill editor inside the admin */
-.rich-editor .ql-toolbar {
-    border: 0 !important;
-    border-bottom: 1px solid #e5e7eb !important;
-    font-family: inherit;
-}
-.rich-editor .ql-container {
-    border: 0 !important;
-    font-size: 0.875rem;
-    font-family: inherit;
-}
-.rich-editor .ql-editor {
-    min-height: 130px;
-}
-.rich-editor .ql-editor.ql-blank::before {
-    color: #9ca3af;
-    font-style: normal;
-}
+.rich-text h2 + p, .rich-text h3 + p { margin-top: 0; }
+.rich-text section { margin-bottom: 2rem; }

@@ -1,0 +1,83 @@
+[
+ {
+  "id": "1",
+  "title": "Demo: HVDC Transmission Design Lead Engineer",
+  "department": "Engineering & Architecture",
+  "location": "Gurugram, India",
+  "type": "Full-Time",
+  "experience": "5-8 Years",
+  "summary": "Lead the advanced electrical and physical layout design of High-Voltage Direct Current (HVDC) converter stations and long-distance transmission corridors across India.",
+  "responsibilities": [
+   "Perform comprehensive insulation coordination and electromagnetic transient (EMT) studies using PSCAD/EMTP.",
+   "Design converter station layouts, main circuit configurations, and earthing grid systems.",
+   "Collaborate closely with civil and geotechnical teams to ensure optimal tower and foundation integrity.",
+   "Ensure adherence to international IEC, IEEE, and Indian Central Electricity Authority (CEA) grid codes."
+  ],
+  "requirements": [
+   "B.Sc. or M.Sc. in Electrical Engineering or Power Systems.",
+   "Minimum 5 years of hands-on experience in HVDC / EHV AC transmission projects.",
+   "Proficiency in power system simulation software (PSCAD, DIgSILENT PowerFactory).",
+   "Strong analytical mindset and capability to execute rigorous risk underwrite assessments."
+  ]
+ },
+ {
+  "id": "2",
+  "title": "Demo: Substation Automation & Protection",
+  "department": "Grid Operations & Control",
+  "location": "Gurugram, India",
+  "type": "Full-Time",
+  "experience": "6-10 Years",
+  "summary": "Spearhead the architecture, configuration, and commissioning of IEC 61850-based substation automation systems and numerical protection schemes.",
+  "responsibilities": [
+   "Design secondary protection systems, SCADA architectures, and GOOSE messaging networks.",
+   "Review vendor control schematics, relay setting calculations, and fault recorder logs.",
+   "Mentor junior automation engineers and coordinate testing protocols with field technicians.",
+   "Drive grid resilience and cybersecurity compliance initiatives across digital substations."
+  ],
+  "requirements": [
+   "Degree in Electrical Engineering, Computer Engineering, or related discipline.",
+   "Expertise in IEC 61850 standard, SCADA/EMS protocols, and numerical relay configuration.",
+   "Extensive background in troubleshooting complex grid disturbances and tripping incidents."
+  ]
+ },
+ {
+  "id": "3",
+  "title": "Demo: EHV Transmission Line Project Manager",
+  "department": "Project Execution",
+  "location": "Gurugram, India",
+  "type": "Full-Time",
+  "experience": "8-12 Years",
+  "summary": "Manage large-scale Extra High Voltage (EHV) overhead and underground transmission line development lifecycle from permitting to commercial operation.",
+  "responsibilities": [
+   "Oversee project budget, timeline milestones, risk registers, and contractor procurement.",
+   "Navigate complex environmental impact assessments, right-of-way acquisitions, and stakeholder dialogue.",
+   "Implement double-underwrite risk frameworks and rigorous safety audits across active construction sites.",
+   "Report project health directly to executive leadership and regulatory boards."
+  ],
+  "requirements": [
+   "PMP certification or equivalent engineering project management qualification.",
+   "Demonstrated track record of delivering high-voltage transmission assets on schedule and budget.",
+   "Exceptional cross-functional leadership, negotiation, and crisis management skills."
+  ]
+ },
+ {
+  "id": "4",
+  "title": "Demo: Assurance & Commissioning Lead",
+  "department": "Quality & Asset Management",
+  "location": "Gurugram, India",
+  "type": "Full-Time",
+  "experience": "6-9 Years",
+  "summary": "Ensure uncompromising quality standards and direct end-to-end site testing procedures for high-capacity transformers, switchgear, and cabling.",
+  "responsibilities": [
+   "Develop Factory Acceptance Test (FAT) and Site Acceptance Test (SAT) protocols.",
+   "Conduct rigorous non-destructive testing, partial discharge analysis, and thermal imaging.",
+   "Document compliance records and lead root-cause failure analyses for equipment anomalies.",
+   "Collaborate with international suppliers to uphold stringent material specifications."
+  ],
+  "requirements": [
+   "Bachelor's degree in Electrical or Mechanical Engineering.",
+   "Proven experience in high-voltage equipment testing and grid commissioning.",
+   "In-depth knowledge of ISO 9001 quality management systems and electrical safety protocols."
+  ]
+ }
+]

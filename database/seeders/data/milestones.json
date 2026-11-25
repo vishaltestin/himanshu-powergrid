@@ -1,0 +1,26 @@
+[
+ {
+  "year": "2026",
+  "title": "The Beginning",
+  "description": "Livora started with a simple vision: make modern people management easier for growing teams. We began by researching the everyday challenges businesses face in managing employees, operations, and workplace communication.",
+  "image": "/images/power-grid-3.jpg"
+ },
+ {
+  "year": "2027",
+  "title": "First Product",
+  "description": "We launched the first version of Livora, bringing essential HR tools into one connected experience. Our focus was on creating a simple, intuitive platform that helps teams spend less time managing processes and more time supporting their people.",
+  "image": "/images/hydro-plant.webp"
+ },
+ {
+  "year": "2028",
+  "title": "Growing Together",
+  "description": "Livora evolved with new tools for employee management, onboarding, collaboration, and workplace operations. Feedback from growing teams helped us improve the platform and build a more flexible experience for modern businesses.",
+  "image": "/images/green-plant.avif"
+ },
+ {
+  "year": "2029",
+  "title": "Looking Ahead",
+  "description": "We continue to build new experiences that make people management simpler, smarter, and more connected for organizations everywhere.",
+  "image": "/images/nuclear-plant.webp"
+ }
+]

@@ -1,0 +1,68 @@
+[
+ {
+  "id": "integrity",
+  "icon": "/images/icons/high-voltage.png",
+  "title": "Integrity",
+  "subtitle": "We do the right thing — always, and transparently.",
+  "description": "Our foundation. We act with absolute honesty with all stakeholders incl. regulators, lenders, partners, OEMs, Employees and communities. We disclose problems early, honour commitments even when inconvenient, and hold ourselves to a zero-tolerance standard on misrepresentation at every level of the organisation.",
+  "inPractice": [
+   "Promoting a culture of “RED IS GOOD”",
+   "Being true to oneself",
+   "When in doubt - disclose",
+   "Zero tolerance for corruption or misrepresentation at any level"
+  ]
+ },
+ {
+  "id": "social-impact",
+  "icon": "/images/icons/smart-grid.png",
+  "title": "Social Impact",
+  "subtitle": "Power is what we transmit. Progress is what we deliver.",
+  "description": "Social Impact is our license to operate. Every line we build powers a hospital, a school, a factory floor, and a family. We measure success not just in megawatts generated/ transmitted but in lives improved. We engage communities honestly, employ locally where possible, and leave every corridor — and every community along it — better than we found it.",
+  "inPractice": [
+   "Community benefit programmes linked to every project corridor",
+   "Local employment and skill development during construction and O&M",
+   "Each project to have impact on society at large",
+   "Social impact metrics tracked and published alongside financial KPIs"
+  ]
+ },
+ {
+  "id": "respect",
+  "icon": "/images/icons/grid.png",
+  "title": "Respect",
+  "subtitle": "We earn the right to build by respecting all those affected.",
+  "description": "Respect for the communities whose land our lines cross. Respect for regulators and their mandate. Respect for our EPC partners and their expertise. Respect for the environment we build through. Respect for employees and those who work for us. We listen before we lay the first foundation — because infrastructure that ignores those it affects doesn't endure. Ours will.",
+  "inPractice": [
+   "Listening to communities before committing to a route — not after",
+   "Treating every regulator engagement as a dialogue, not a transaction",
+   "Honouring the expertise of our EPC and supply chain partners",
+   "Environmental sensitivity built into design — not bolted on as compliance"
+  ]
+ },
+ {
+  "id": "collaboration",
+  "icon": "/images/icons/infra.png",
+  "title": "Collaboration",
+  "subtitle": "We build together, we succeed together.",
+  "description": "Transmission is a team sport. TBCB projects involve dozens of stakeholders incl external stakeholders like EPC contractors, OEMs, regulators, local communities, and financial partners and internal stakeholders like D&E, Surveyor, Treasury, Finance, Projects, Safety and Quality, Regulatory, Accounts, Audit, Tax, Policy Advocacy, Contracts, Claims, Bidding, SCM, Corporate Affairs, Asset Management, HR, Planning etc. We collaborate genuinely: sharing knowledge, aligning incentives, and treating every partner as essential to the outcome.",
+  "inPractice": [
+   "Early and genuine engagement with communities along every project corridor",
+   "Transparent, fair dealing with EPC and supply chain partners",
+   "Co-developing solutions with regulators rather than litigating against them",
+   "Sharing lessons learned openly across the project ecosystem",
+   "We believe in team-work"
+  ]
+ },
+ {
+  "id": "innovation",
+  "icon": "/images/icons/high-voltage.png",
+  "title": "Innovation",
+  "subtitle": "Find a better way — in technology, execution and thinking.",
+  "description": "India needs 1800 GW of electricity by 2047 and 51,000 circuit km of new transmission lines by 2030. From HVDC and digital twin monitoring to drone-assisted stringing and AI-driven project management — we embrace tools that let us build faster, smarter, and with a smaller footprint. Innovation is not a department at Cube Grid — it is how we approach every challenge on every project.",
+  "inPractice": [
+   "Process Innovation or construction – New ways of doing anything",
+   "Technology that reduces RoW impact, construction time, and ecological footprint",
+   "Drone and LiDAR-based surveys replacing conventional manual methods",
+   "Continuous improvement reviews embedded into every delivery cycle"
+  ]
+ }
+]

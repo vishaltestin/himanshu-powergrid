@@ -6,99 +6,93 @@ use App\Http\Controllers\Controller;
 use App\Models\FormSubmission;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Response as IlluminateResponse;
-use Inertia\Inertia;
-use Inertia\Response;
+use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class FormSubmissionController extends Controller
 {
-    public function index(Request $request): Response
-    {
-        $query = FormSubmission::query()
-            ->when($request->filled('type') && $request->input('type') !== 'all', fn ($q) => $q->where('type', $request->input('type')))
-            ->when($request->filled('status') && $request->input('status') !== 'all', fn ($q) => $q->where('status', $request->input('status')))
-            ->when($request->filled('search'), function ($q) use ($request) {
-                $search = $request->input('search');
-                $q->where(function ($qq) use ($search) {
-                    $qq->where('name', 'like', "%{$search}%")
-                        ->orWhere('email', 'like', "%{$search}%")
-                        ->orWhere('phone', 'like', "%{$search}%")
-                        ->orWhere('message', 'like', "%{$search}%");
-                });
-            });
+    public const TYPES = ['contact' => 'Contact', 'enquiry' => 'Enquiry', 'career' => 'Career', 'newsletter' => 'Newsletter', 'other' => 'Other'];
+    public const STATUSES = ['new' => 'New', 'read' => 'Read', 'archived' => 'Archived'];
 
-        return Inertia::render('admin/submissions/index', [
-            'submissions' => $query->latest()->paginate(15)->withQueryString(),
-            'filters' => $request->only(['type', 'status', 'search']),
-            'counts' => [
-                'all' => FormSubmission::count(),
-                'new' => FormSubmission::where('status', 'new')->count(),
-                'contact' => FormSubmission::where('type', 'contact')->count(),
-                'enquiry' => FormSubmission::where('type', 'enquiry')->count(),
-                'career' => FormSubmission::where('type', 'career')->count(),
-                'newsletter' => FormSubmission::where('type', 'newsletter')->count(),
-            ],
+    private function filtered(Request $request)
+    {
+        return FormSubmission::query()
+            ->when($request->filled('type'), fn ($q) => $q->where('type', $request->input('type')))
+            ->when($request->filled('status'), fn ($q) => $q->where('status', $request->input('status')))
+            ->when($request->filled('search'), function ($q) use ($request) {
+                $s = '%' . $request->input('search') . '%';
+                $q->where(fn ($w) => $w->where('name', 'like', $s)->orWhere('email', 'like', $s)->orWhere('phone', 'like', $s)->orWhere('message', 'like', $s)->orWhere('subject', 'like', $s));
+            });
+    }
+
+    public function index(Request $request): View
+    {
+        return view('admin.submissions.index', [
+            'submissions' => $this->filtered($request)->latest()->paginate(20)->withQueryString(),
+            'types' => self::TYPES,
+            'statuses' => self::STATUSES,
+            'typeCounts' => FormSubmission::selectRaw('type, count(*) as total')->groupBy('type')->pluck('total', 'type'),
+            'newCount' => FormSubmission::where('status', 'new')->count(),
+            'total' => FormSubmission::count(),
         ]);
     }
 
-    public function show(FormSubmission $submission): Response
+    public function show(FormSubmission $submission): View
     {
         if ($submission->status === 'new') {
             $submission->update(['status' => 'read']);
         }
 
-        return Inertia::render('admin/submissions/show', ['submission' => $submission]);
+        return view('admin.submissions.show', [
+            'submission' => $submission,
+            'statuses' => self::STATUSES,
+            'types' => self::TYPES,
+            'prev' => FormSubmission::where('id', '>', $submission->id)->orderBy('id')->value('id'),
+            'next' => FormSubmission::where('id', '<', $submission->id)->orderByDesc('id')->value('id'),
+        ]);
     }
 
     public function update(Request $request, FormSubmission $submission): RedirectResponse
     {
-        $validated = $request->validate([
-            'status' => ['required', 'in:new,read,archived'],
+        $submission->update($request->validate(['status' => ['required', 'in:' . implode(',', array_keys(self::STATUSES))]]));
+
+        return back()->with('message', 'Marked as ' . strtolower(self::STATUSES[$submission->status]) . '.');
+    }
+
+    public function bulk(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'ids' => ['required', 'array'],
+            'ids.*' => ['integer'],
+            'action' => ['required', 'in:read,new,archived,delete'],
         ]);
 
-        $submission->update($validated);
+        $query = FormSubmission::whereIn('id', $data['ids']);
+        $count = $query->count();
+        $data['action'] === 'delete' ? $query->delete() : $query->update(['status' => $data['action']]);
 
-        return back()->with('message', 'Submission updated.');
+        return back()->with('message', "{$count} submission(s) updated.");
     }
 
     public function destroy(FormSubmission $submission): RedirectResponse
     {
         $submission->delete();
 
-        return back()->with('message', 'Submission deleted.');
+        return redirect()->route('admin.submissions.index')->with('message', 'Submission deleted.');
     }
 
-    public function export(Request $request)
+    public function export(Request $request): StreamedResponse
     {
-        $rows = FormSubmission::query()
-            ->when($request->filled('type') && $request->input('type') !== 'all', fn ($q) => $q->where('type', $request->input('type')))
-            ->latest()
-            ->get();
+        $rows = $this->filtered($request)->latest()->get();
 
-        $csv = "ID,Type,Status,Name,Email,Phone,Subject,Message,Data,Created At\n";
-
-        foreach ($rows as $row) {
-            $csv .= implode(',', array_map(function ($value) {
-                $value = (string) ($value ?? '');
-                return '"' . str_replace('"', '""', $value) . '"';
-            }, [
-                $row->id,
-                $row->type,
-                $row->status,
-                $row->name,
-                $row->email,
-                $row->phone,
-                $row->subject,
-                $row->message,
-                $row->data ? json_encode($row->data) : '',
-                $row->created_at->format('Y-m-d H:i:s'),
-            ])) . "\n";
-        }
-
-        return IlluminateResponse::streamDownload(function () use ($csv) {
-            echo $csv;
-        }, 'form-submissions-' . now()->format('Ymd-His') . '.csv', [
-            'Content-Type' => 'text/csv',
-        ]);
+        return response()->streamDownload(function () use ($rows) {
+            $out = fopen('php://output', 'w');
+            fputcsv($out, ['ID', 'Type', 'Status', 'Name', 'Email', 'Phone', 'Subject', 'Message', 'Extra data', 'Submitted at']);
+            foreach ($rows as $row) {
+                $extra = collect($row->data ?? [])->map(fn ($v, $k) => $k . ': ' . (is_array($v) ? json_encode($v) : $v))->implode(' | ');
+                fputcsv($out, [$row->id, $row->type, $row->status, $row->name, $row->email, $row->phone, $row->subject, $row->message, $extra, $row->created_at->format('Y-m-d H:i:s')]);
+            }
+            fclose($out);
+        }, 'submissions-' . now()->format('Ymd-His') . '.csv', ['Content-Type' => 'text/csv']);
     }
 }

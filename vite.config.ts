@@ -24,7 +24,7 @@ export default defineConfig({
     
     plugins: [
         laravel({
-            input: ['resources/css/app.css', 'resources/js/app.tsx'],
+            input: ['resources/css/app.css', 'resources/js/app.tsx', 'resources/css/admin.css', 'resources/js/admin/admin.js'],
             refresh: true,
             // fonts: [
             //     bunny('Instrument Sans', {

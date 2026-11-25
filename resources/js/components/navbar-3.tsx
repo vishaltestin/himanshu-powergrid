@@ -6,7 +6,7 @@ import {
     SheetTrigger,
 } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
-import { Link, usePage } from '@inertiajs/react';
+import { Link, router, usePage } from '@inertiajs/react';
 import {
     ArrowRight,
     ChevronDown,
@@ -23,132 +23,22 @@ import {
 import { useEffect, useRef, useState } from 'react';
 import MaxWidthWrapper from './max-width-wrapper';
 
-const DEFAULT_NAV_LINKS = [
-    { name: 'Home', href: '/' },
-
-    {
-        name: 'About Us',
-        isLink: true,
-        href: '/about-us',
-        megaMenu: [
-            { name: 'Overview', href: '/about-us' },
-            {
-                name: 'Mission & Vision',
-                href: '/about-us#vission-mission',
-            },
-            {
-                name: 'Our Values',
-                href: '/our-values',
-            },
-            { name: 'Management Team', href: '/teams' },
-            { name: 'Our Investors', href: '/investors' },
-            { name: 'Milestones', href: '/milestones' },
-            // { name: 'Life at CubeGrid', href: 'life-at-cubegrid' },
-            // { name: 'Certificates', href: '#' },
-        ],
-    },
-
-    // {
-    //     name: 'Pillars',
-    //     href: '/pillers',
-    //     isLink: true,
-    //     isFullWidth: true,
-    //     megaMenu: [
-    //         {
-    //             name: 'Transmission Infrastructure',
-    //             href: '/pillar/transmission-infrastructure',
-    //             icon: <UtilityPole />,
-    //             desc: 'Developing and operating high-voltage transmission networks',
-    //         },
-    //         {
-    //             name: 'EPC for Renewable Evacuation',
-    //             href: '/pillar/epc-for-renewable-evacuation',
-    //             icon: <Spool />,
-    //             desc: 'Engineering, procurement, and construction for transmission lines',
-    //         },
-    //         {
-    //             name: 'Pumped Hydro Storage',
-    //             href: '/pillar/pumped-hydro-storage',
-    //             icon: <DatabaseZap />,
-    //             desc: "'Developing pumped storage hydropower (PSH) projects for long-duration energy storage",
-    //         },
-    //         {
-    //             name: 'Distribution Privatization',
-    //             href: '/pillar/distribution-privatization',
-    //             icon: <Plug />,
-    //             desc: "Participating in India's power distribution reform and privatization.",
-    //         },
-    //         {
-    //             name: 'Nuclear Power — Shanti',
-    //             href: '/pillar/nuclear-power-shanti',
-    //             icon: <Radiation />,
-    //             desc: "Preparing for India's opening of nuclear energy to the private sector.",
-    //         },
-    //         {
-    //             name: 'Green Hydrogen',
-    //             href: '/pillar/green-hydrogen',
-    //             icon: <Heading2 />,
-    //             desc: 'Developing green hydrogen production facilities powered by dedicated renewable energy.',
-    //         },
-    //     ],
-    // },
-
-    {
-        name: 'Projects',
-        href: '/projects',
-    },
-
-    {
-        name: 'Blogs',
-        href: '/blogs',
-    },
-
-    {
-        name: 'Media',
-        href: '#',
-        megaMenu: [
-            { name: 'News & Updates', href: '/news' },
-            { name: 'Events', href: '/events' },
-        ],
-    },
-
-    {
-        name: 'Career',
-        href: '#',
-        megaMenu: [
-            { name: 'Life @ CubeGrid', href: '/life-at-cubegrid' },
-            { name: 'Apply Now', href: '/career' },
-        ],
-    },
-
-    {
-        name: 'Contact Us',
-        href: '/contact-us',
-        megaMenu: [
-            { name: 'Reach Us', href: '/contact-us' },
-            { name: 'Enquiry', href: '/enquiry' },
-        ],
-    },
-];
+type MenuItem = { title: string; href?: string | null; icon?: string | null; children?: MenuItem[] };
 
 export const NavbarThree = () => {
     const { props } = usePage<any>();
 
     // Dynamic navigation from the admin (Menus screen), with the original
     // hardcoded structure as a fallback while the DB is empty.
-    const dbMenus: any[] = props.globalMenus ?? [];
-    const navLinks: any[] = dbMenus.length
-        ? dbMenus.map((m) => ({
-              name: m.title,
-              href: m.alias,
-              isLink: m.alias !== '#',
-              megaMenu: (m.children ?? []).length
-                  ? (m.children ?? []).map((c: any) => ({ name: c.title, href: c.alias }))
-                  : undefined,
-          }))
-        : DEFAULT_NAV_LINKS;
-
-    // Dynamic logo from settings
+    const mainMenu: MenuItem[] = props.menus?.main ?? [];
+    const navLinks: any[] = mainMenu.map((m) => ({
+        name: m.title,
+        href: m.href || '#',
+        isLink: !!m.href && m.href !== '#',
+        megaMenu: m.children?.length ? m.children.map((c) => ({ name: c.title, href: c.href || '#' })) : undefined,
+    }));
+    const settings: Record<string, any> = props.settings ?? {};
+    const searchEnabled = settings.search_enabled !== false;
     const logo: string = props.settings?.logo || '/images/logo-new.png';
 
     const [isSticky, setIsSticky] = useState(false);
@@ -156,6 +46,36 @@ export const NavbarThree = () => {
 
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const searchInputRef = useRef<HTMLInputElement>(null);
+    const [query, setQuery] = useState('');
+    const [results, setResults] = useState<{ title: string; href: string; type: string; excerpt?: string }[]>([]);
+    const [searching, setSearching] = useState(false);
+
+    useEffect(() => {
+        const q = query.trim();
+        if (q.length < 2) {
+            setResults([]);
+            return;
+        }
+        setSearching(true);
+        const ctrl = new AbortController();
+        const t = setTimeout(() => {
+            fetch(`/search?q=${encodeURIComponent(q)}`, { signal: ctrl.signal, headers: { Accept: 'application/json' } })
+                .then((r) => r.json())
+                .then((d) => setResults(d.results ?? []))
+                .catch(() => {})
+                .finally(() => setSearching(false));
+        }, 250);
+        return () => {
+            clearTimeout(t);
+            ctrl.abort();
+        };
+    }, [query]);
+
+    const goTo = (href: string) => {
+        setIsSearchOpen(false);
+        setQuery('');
+        router.visit(href);
+    };
 
     const [isMobileSheetOpen, setIsMobileSheetOpen] = useState(false);
     const [openMobileMenus, setOpenMobileMenus] = useState<
@@ -216,7 +136,7 @@ export const NavbarThree = () => {
                 <div className="flex w-full items-center justify-between px-8 py-8 md:px-16">
                     <img
                         src={logo}
-                        alt="Logo"
+                        alt={settings.site_name || ''}
                         className="h-8 object-contain md:h-12"
                     />
                     <button
@@ -229,25 +149,46 @@ export const NavbarThree = () => {
                 </div>
 
                 {/* Centered Search Input Area */}
-                <div className="flex flex-1 items-center justify-center px-6">
+                <form
+                    className="flex flex-1 flex-col items-center justify-center px-6"
+                    onSubmit={(e) => {
+                        e.preventDefault();
+                        if (results[0]) goTo(results[0].href);
+                    }}
+                >
                     <div className="relative w-full max-w-6xl">
                         <input
                             ref={searchInputRef}
-                            type="text"
-                            placeholder="Search Your Word Here ..."
+                            type="search"
+                            value={query}
+                            onChange={(e) => setQuery(e.target.value)}
+                            placeholder={settings.search_placeholder}
                             className="search-border w-full bg-transparent py-4 pr-14 pl-0 font-heading text-2xl font-light text-black transition-colors outline-none placeholder:text-gray-400 focus:border-black md:text-4xl"
                         />
-                        <button
-                            className="absolute top-1/2 right-2 -translate-y-1/2 text-black transition-colors hover:text-accent"
-                            aria-label="Submit search"
-                        >
-                            <Search
-                                className="size-6 md:size-9"
-                                strokeWidth={1.5}
-                            />
+                        <button type="submit" className="absolute top-1/2 right-2 -translate-y-1/2 text-black transition-colors hover:text-accent" aria-label="Submit search">
+                            <Search className="size-6 md:size-9" strokeWidth={1.5} />
                         </button>
+                        {query.trim().length >= 2 && (
+                            <div className="absolute top-full right-0 left-0 z-10 mt-2 max-h-[50vh] overflow-y-auto rounded-xl bg-white shadow-2xl ring-1 ring-black/5">
+                                {results.length === 0 && !searching && <p className="mb-0 px-5 py-4 text-gray-500">{settings.search_no_results}</p>}
+                                {results.map((r) => (
+                                    <button
+                                        type="button"
+                                        key={r.type + r.href}
+                                        onClick={() => goTo(r.href)}
+                                        className="flex w-full items-start justify-between gap-4 border-b border-gray-100 px-5 py-3 text-left last:border-0 hover:bg-gray-50"
+                                    >
+                                        <span>
+                                            <span className="block font-semibold text-black">{r.title}</span>
+                                            {r.excerpt && <span className="line-clamp-1 text-sm text-gray-500">{r.excerpt}</span>}
+                                        </span>
+                                        <span className="shrink-0 rounded-full bg-accent/10 px-2 py-0.5 text-xs font-medium text-accent">{r.type}</span>
+                                    </button>
+                                ))}
+                            </div>
+                        )}
                     </div>
-                </div>
+                </form>
             </div>
 
             {/* Background overlay when search is open */}
@@ -266,7 +207,7 @@ export const NavbarThree = () => {
                             <Link href="/">
                                 <img
                                     src={logo}
-                                    alt="Logo"
+                                    alt={settings.site_name || ''}
                                     className="object-contain"
                                 />
                             </Link>
@@ -403,20 +344,22 @@ export const NavbarThree = () => {
                                 );
                             })}
 
-                            <button
+                            {searchEnabled && <button
                                 onClick={() => setIsSearchOpen(true)}
+                                aria-label="Search"
                                 className="flex size-12 cursor-pointer items-center justify-center rounded-full bg-accent-foreground text-white transition-all duration-300 hover:bg-black/10 hover:text-black"
                             >
                                 <Search className="transition-all duration-300" />
-                            </button>
+                            </button>}
                         </nav>
                         <div className="flex items-center gap-1 lg:hidden">
-                            <button
+                            {searchEnabled && <button
                                 onClick={() => setIsSearchOpen(true)}
+                                aria-label="Search"
                                 className="flex size-10 items-center justify-center text-black transition-colors hover:bg-gray-200"
                             >
                                 <Search size={20} />
-                            </button>
+                            </button>}
 
                             <Sheet
                                 open={isMobileSheetOpen}
@@ -438,7 +381,7 @@ export const NavbarThree = () => {
                                         <SheetTitle className="mb-0 text-left">
                                             <img
                                                 src={logo}
-                                                alt="Logo"
+                                                alt={settings.site_name || ''}
                                                 className="h-8 object-contain"
                                             />
                                         </SheetTitle>

@@ -1,4 +1,8 @@
 {
+  "_chunk-C8eOpuJ-.js": {
+    "file": "assets/chunk-C8eOpuJ-.js",
+    "name": "chunk"
+  },
   "node_modules/@fontsource-variable/geist/files/geist-cyrillic-wght-normal.woff2": {
     "file": "assets/geist-cyrillic-wght-normal-CHSlOQsW.woff2",
     "src": "node_modules/@fontsource-variable/geist/files/geist-cyrillic-wght-normal.woff2"
@@ -11,8 +15,17 @@
     "file": "assets/geist-latin-wght-normal-Dm3htQBi.woff2",
     "src": "node_modules/@fontsource-variable/geist/files/geist-latin-wght-normal.woff2"
   },
+  "resources/css/admin.css": {
+    "file": "assets/admin-CS0u2kEX.css",
+    "name": "admin",
+    "names": [
+      "admin.css"
+    ],
+    "src": "resources/css/admin.css",
+    "isEntry": true
+  },
   "resources/css/app.css": {
-    "file": "assets/app-CzRenQot.css",
+    "file": "assets/app-CyvAzgWw.css",
     "name": "app",
     "names": [
       "app.css"
@@ -25,17 +38,25 @@
       "assets/geist-latin-wght-normal-Dm3htQBi.woff2"
     ]
   },
+  "resources/js/admin/admin.js": {
+    "file": "assets/admin-CbAgIooN.js",
+    "name": "admin",
+    "src": "resources/js/admin/admin.js",
+    "isEntry": true,
+    "imports": [
+      "_chunk-C8eOpuJ-.js"
+    ]
+  },
   "resources/js/app.tsx": {
-    "file": "assets/app-Bi3SJ7ZR.js",
+    "file": "assets/app-C98kWk6P.js",
     "name": "app",
     "src": "resources/js/app.tsx",
     "isEntry": true,
-    "dynamicImports": [
-      "resources/js/app.tsx"
+    "imports": [
+      "_chunk-C8eOpuJ-.js"
     ],
     "css": [
-      "assets/app-DVB7LGv8.css",
-      "assets/app-CzRenQot.css"
+      "assets/app-CyvAzgWw.css"
     ],
     "assets": [
       "assets/geist-cyrillic-wght-normal-CHSlOQsW.woff2",
